@@ -69,7 +69,9 @@ server.register([
     {
       register: require('./server/controller/gaode_controller.js')
     },
-
+    {
+      register: require('./server/controller/vehicles_controller.js')
+    },
 
 ], function () {
     //Start the server
