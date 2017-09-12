@@ -78,7 +78,9 @@ server.register([
     {
       register: require('./server/controller/gps_history_controller.js')
     },
-
+    {
+      register: require('./server/controller/lastest_records_controller.js')
+    },
 
 ], function () {
     //Start the server
