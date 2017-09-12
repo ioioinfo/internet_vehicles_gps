@@ -4,7 +4,7 @@ var server = new Hapi.Server();
 
 // Setup the server with a host and port
 server.connection({
-    port: parseInt(process.env.PORT, 10) || 18021,
+    port: parseInt(process.env.PORT, 10) || 18037,
     host: '0.0.0.0'
 });
 
@@ -66,7 +66,9 @@ server.register([
     {
       register: require('./server/models/models.js')
     },
-    
+    {
+      register: require('./server/controller/gaode_controller.js')
+    },
 
 
 ], function () {

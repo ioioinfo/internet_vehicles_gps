@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>主页</title>
+<script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
+<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
+</head>
+<body>
+    <div id="container" style="width:500px; height:300px"></div>
+
+
+
+<script>
+$(function(){
+    var infoWindow;
+    var provinces = "{{provinces|safe}}";
+    //标记图片设置
+    var icon = new AMap.Icon({
+        image : 'images/car_gps.png',//24px*24px
+        //icon可缺省，缺省时为默认的蓝色水滴图标，
+        size : new AMap.Size(36,36),
+        imageSize : new AMap.Size(36,36)
+    });
+
+    function init(){
+        $.get("/cars_positions",function(data){
+            if (data.success) {
+                //地图中心位置
+                var map = new AMap.Map('container', {
+                    center: data.cars_positions[0].cars_positions,
+                    zoom: 20
+                });
+                map.plugin(["AMap.ToolBar"], function() {
+                    map.addControl(new AMap.ToolBar());
+                });
+                //汽车标记
+                var marker = new AMap.Marker({
+                    icon : icon,//24px*24px
+                    position : data.cars_positions[0].cars_positions,
+                    offset : new AMap.Pixel(-12,-12),
+                    map : map
+                });
+                //点击事件
+                AMap.event.addListener(marker, 'click', function() {
+                    infoWindow.open(map, marker.getPosition());
+                })
+                //构建信息窗体中显示的内容
+                var content=[];
+                content.push(data.cars_positions[0].name);
+                content.push("电话："+data.cars_positions[0].name);
+                content.push('<a href="http://ditu.amap.com/detail/B000A8URXB?citycode=110105" target="_blank">详细信息</a>');
+
+                infoWindow = new AMap.InfoWindow({
+                    content: content.join("<br>")  //使用默认信息窗体框样式，显示信息内容
+                });
+                infoWindow.open(map, map.getCenter());
+            }else {
+
+            };
+        });
+    };
+    init();
+
+})
+</script>
+</body>
+</html>

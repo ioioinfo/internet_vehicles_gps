@@ -7,4 +7,3 @@ var view_globals = function(server,request) {
 };
 
 module.exports = view_globals;
-
