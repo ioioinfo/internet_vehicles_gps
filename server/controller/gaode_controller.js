@@ -47,21 +47,30 @@ exports.register = function(server, options, next){
             method: 'GET',
             path: '/',
             handler: function(request, reply){
-                return reply.view("homePage");
+				var info = {};
+				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
+                    if (!err) {
+						return reply.view("homePage",{"rows":rows,"vehicles":JSON.stringify(rows)});
+					}else {
+						return reply({"success":false,"message":rows.message});
+					}
+				});
+
             }
         },
         {
             method: 'GET',
             path: '/cars_positions',
             handler: function(request, reply){
-                var cars_positions = [
-                    {
-                        "position":[121.439943, 31.343803],
-                        "name":"佑佑信息科技有限公司",
-                        "phone":"021-64733333"
-                    }
-                ];
-                return reply({"success":true,"cars_positions":cars_positions});
+				var info = {};
+				server.plugins['models'].lastest_records.get_lastest_records(info,function(err,rows){
+                    if (!err) {
+						return reply({"success":true,"rows":rows});
+					}else {
+						return reply({"success":false,"message":rows.message});
+					}
+				});
+
             }
         },
 

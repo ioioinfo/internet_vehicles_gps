@@ -9,54 +9,89 @@
 <body>
     <div id="container" style="width:500px; height:300px"></div>
 
+    {% for row in rows %}
+        <li class="gps" data-id="{{ row.gps_id }}">{{ row.code }}</li>
+    {% endfor %}
+
 
 
 <script>
 $(function(){
     var infoWindow;
-    var provinces = "{{provinces|safe}}";
+    var vehicles = {{vehicles|safe}};
+
     //标记图片设置
     var icon = new AMap.Icon({
         image : 'images/car_gps.png',//24px*24px
         //icon可缺省，缺省时为默认的蓝色水滴图标，
-        size : new AMap.Size(36,36),
-        imageSize : new AMap.Size(36,36)
+        size : new AMap.Size(24,24),
+        imageSize : new AMap.Size(24,24)
+    });
+    var markers = [];
+    var map;
+    var location_map = {};
+    $(".gps").click(function(){
+        var gps_id = $(this).data("id");
+        for (var i = 0; i < vehicles.length; i++) {
+            if (vehicles[i].gps_id==gps_id) {
+                map.setCenter([location_map[gps_id].longitude,location_map[gps_id].latitude]);
+            }
+        }
     });
 
     function init(){
         $.get("/cars_positions",function(data){
             if (data.success) {
+                var rows = data.rows;
                 //地图中心位置
-                var map = new AMap.Map('container', {
-                    center: data.cars_positions[0].cars_positions,
-                    zoom: 20
+                map = new AMap.Map('container', {
+                    center: [rows[0].longitude,rows[0].latitude],
+                    zoom: 10
                 });
                 map.plugin(["AMap.ToolBar"], function() {
                     map.addControl(new AMap.ToolBar());
                 });
-                //汽车标记
-                var marker = new AMap.Marker({
-                    icon : icon,//24px*24px
-                    position : data.cars_positions[0].cars_positions,
-                    offset : new AMap.Pixel(-12,-12),
-                    map : map
-                });
+                var infoWindow = new AMap.InfoWindow();
+                for (var i = 0; i < rows.length; i++) {
+                    location_map[rows[i].gps_id] = rows[i];
+                    var marker;
+                    //汽车标记
+                    marker = new AMap.Marker({
+                        icon : icon,//24px*24px
+                        position : [rows[i].longitude,rows[i].latitude],
+                        offset : new AMap.Pixel(-12,-12),
+                        map : map
+                    });
+                    marker.content='我是第'+rows[i].gps_id+'GPS定位器';
+                    marker.on('click',markerClick);
+                    marker.emit('click',{target:marker});
+                }
+                function markerClick(e){
+                    infoWindow.setContent(e.target.content);
+                    infoWindow.open(map, e.target.getPosition());
+                    map.setCenter(e.target.getPosition());
+                };
+                map.setFitView();
                 //点击事件
-                AMap.event.addListener(marker, 'click', function() {
-                    infoWindow.open(map, marker.getPosition());
-                })
+                // AMap.event.addListener(marker, 'click', function() {
+                //     infoWindow.open(map, marker.getPosition());
+                // })
                 //构建信息窗体中显示的内容
-                var content=[];
-                content.push(data.cars_positions[0].name);
-                content.push("电话："+data.cars_positions[0].name);
-                content.push('<a href="http://ditu.amap.com/detail/B000A8URXB?citycode=110105" target="_blank">详细信息</a>');
+                // var content=[];
+                // content.push("GPS："+rows[i].gps_id);
+                // content.push("纬度："+rows[i].longitude);
+                // content.push("经度："+rows[i].latitude);
+                // content.push('<a href="http://ditu.amap.com/detail/B000A8URXB?citycode=110105" target="_blank">详细信息</a>');
+                //
+                // infoWindow = new AMap.InfoWindow({
+                //     content: content.join("<br>")  //使用默认信息窗体框样式，显示信息内容
+                // });
+                // infoWindow.open(map, map.getCenter());
 
-                infoWindow = new AMap.InfoWindow({
-                    content: content.join("<br>")  //使用默认信息窗体框样式，显示信息内容
-                });
-                infoWindow.open(map, map.getCenter());
+
+
             }else {
-
+                alert(data.message);
             };
         });
     };
