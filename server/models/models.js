@@ -2,6 +2,7 @@
 exports.register = function(server, options, next){
 
 	server.expose('vehicles', require('./vehicles.js')(server));
+	server.expose('gps_equipments', require('./gps_equipments.js')(server));
 
 	next();
 }
