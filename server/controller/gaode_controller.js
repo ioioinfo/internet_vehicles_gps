@@ -58,21 +58,8 @@ exports.register = function(server, options, next){
 
             }
         },
-        {
-            method: 'GET',
-            path: '/cars_positions',
-            handler: function(request, reply){
-				var info = {};
-				server.plugins['models'].lastest_records.get_lastest_records(info,function(err,rows){
-                    if (!err) {
-						return reply({"success":true,"rows":rows});
-					}else {
-						return reply({"success":false,"message":rows.message});
-					}
-				});
 
-            }
-        },
+
 
 
 

@@ -27,7 +27,25 @@ $(function(){
         size : new AMap.Size(24,24),
         imageSize : new AMap.Size(24,24)
     });
-    var markers = [];
+    var icon2 = new AMap.Icon({
+        image : 'images/bike.png',//24px*24px
+        //icon可缺省，缺省时为默认的蓝色水滴图标，
+        size : new AMap.Size(24,24),
+        imageSize : new AMap.Size(24,24)
+    });
+    var icon3 = new AMap.Icon({
+        image : 'images/autobike.png',//24px*24px
+        //icon可缺省，缺省时为默认的蓝色水滴图标，
+        size : new AMap.Size(24,24),
+        imageSize : new AMap.Size(24,24)
+    });
+    var icon4 = new AMap.Icon({
+        image : 'images/fly.png',//24px*24px
+        //icon可缺省，缺省时为默认的蓝色水滴图标，
+        size : new AMap.Size(24,24),
+        imageSize : new AMap.Size(24,24)
+    });
+    var markers = {};
     var map;
     var location_map = {};
     $(".gps").click(function(){
@@ -40,17 +58,21 @@ $(function(){
     });
 
     function init(){
-        $.get("/cars_positions",function(data){
+        $.get("/get_lastest_records",function(data){
             if (data.success) {
                 var rows = data.rows;
-                //地图中心位置
+                //地图对象，中心位置，比例
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
                     zoom: 10
                 });
-                map.plugin(["AMap.ToolBar"], function() {
+                //地图工具，调节街市省，比例，鹰眼
+                map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
                     map.addControl(new AMap.ToolBar());
+                    map.addControl(new AMap.Scale());
+                    map.addControl(new AMap.OverView({isOpen:true}));
                 });
+                //信息框对象
                 var infoWindow = new AMap.InfoWindow();
                 for (var i = 0; i < rows.length; i++) {
                     location_map[rows[i].gps_id] = rows[i];
@@ -62,13 +84,17 @@ $(function(){
                         offset : new AMap.Pixel(-12,-12),
                         map : map
                     });
+                    //弹出信息框
                     marker.content='我是第'+rows[i].gps_id+'GPS定位器';
                     marker.on('click',markerClick);
                     marker.emit('click',{target:marker});
+                    markers[rows[i].gps_id] = marker;
                 }
+                //点击事件
                 function markerClick(e){
                     infoWindow.setContent(e.target.content);
                     infoWindow.open(map, e.target.getPosition());
+                    //设置地图中心点位置
                     map.setCenter(e.target.getPosition());
                 };
                 map.setFitView();
@@ -88,7 +114,7 @@ $(function(){
                 // });
                 // infoWindow.open(map, map.getCenter());
 
-
+                setTimeout(vehicles_run,3000);
 
             }else {
                 alert(data.message);
@@ -96,6 +122,45 @@ $(function(){
         });
     };
     init();
+
+    var vehicles_run = function(){
+        for (var i = 0; i < vehicles.length; i++) {
+            var vehicle = vehicles[i];
+            if (markers[vehicle.gps_id]) {
+                var maker = markers[vehicle.gps_id];
+                maker.setIcon(icon4);
+                maker.moveTo([122.438083000000,31.347179000000],300);
+            }
+        }
+
+        // var lastest_record = {
+        //     "id":1,
+        //     "gps_id":1,
+        //     "longitude":"121.438083000000",
+        //     "latitude":"31.347179000000",
+        //     "time":"2017-09-13 11:53:00"
+        // };
+        // var history_record = {
+        //     "gps_id":1,
+        //     "longitude":"121.438083000000",
+        //     "latitude":"31.347179000000",
+        //     "time":"2017-09-13 11:53:00"
+        // }
+        // $.post("/update_lastest_record",{"lastest_record":JSON.stringify(lastest_record)},function(data){
+        //     if (data.success) {
+        //         $.post("/save_history_record",{"history_record":JSON.stringify(history_record)},function(data){
+        //             if (data.success) {
+        //                 init();
+        //             }else {
+        //                 alert(data.message);
+        //             }
+        //         });
+        //     }else {
+        //         alert(data.message);
+        //     }
+        // });
+
+    };
 
 })
 </script>
