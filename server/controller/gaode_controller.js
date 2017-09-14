@@ -48,9 +48,8 @@ var get_info = function(data,cb){
 	var aw = data.aw;
 	var bj = data.bj;
 	var bw = data.bw;
-
+	console.log("data:"+JSON.stringify(data));
 	var c1 = math.eval('cos((90-'+bw+') deg)');
-	console.log("c1:"+c1);
 	var c2 = math.eval('cos((90-'+aw+') deg)');
 	var s1 = math.eval('sin((90-'+bw+') deg)');
 	var s2 = math.eval('sin((90-'+aw+') deg)');
