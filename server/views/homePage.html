@@ -3,15 +3,41 @@
 <head>
 <meta charset="utf-8">
 <title>主页</title>
+<link rel="stylesheet" href="css/font-awesome.min.css">
 <script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
 <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
+<style media="screen">
+  #container{
+    float: left;
+    width:70%;
+    height:300px ;
+  }
+  li{
+    list-style: none;
+  }
+  i{
+    margin: 0 30px;
+    color: red;
+  }
+  .state0{
+    color: #666;
+  }
+  .state1{
+    color: red;
+  }
+</style>
 </head>
 <body>
-    <div id="container" style="width:500px; height:300px"></div>
+    <div id="container"></div>
 
+    <ul>
     {% for row in rows %}
-        <li class="gps" data-id="{{ row.gps_id }}">{{ row.code }}</li>
+        <li class="gps" data-id="{{ row.gps_id }}">
+          <p><i class="fa fa-car  state{{row.state}}"></i>{{ row.code }}</p>
+          <p></p>
+        </li>
     {% endfor %}
+    </ul>
 
 
 
