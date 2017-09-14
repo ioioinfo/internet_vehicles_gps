@@ -77,6 +77,22 @@ var lastest_records = function(server) {
 				cb(false,results);
 			});
 		},
+		//查询
+		search_lastest_by_gps : function(gps_id, cb){
+			var query = `select id, gps_id, longitude, latitude,
+                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+                DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at
+			    from lastest_records where flag = 0 and gps_id = ?
+			`;
+			server.plugins['mysql'].query(query,[gps_id],function(err, results) {
+				if (err) {
+					console.log(err);
+					cb(true,results);
+					return;
+				}
+				cb(false,results);
+			});
+		},
 		//删除
 		delete_lastest_record:function(id, cb){
 			var query = `update lastest_records set flag = 1, updated_at = now()

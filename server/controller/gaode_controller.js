@@ -3,7 +3,11 @@ const uu_request = require('../utils/uu_request');
 const uuidV1 = require('uuid/v1');
 var eventproxy = require('eventproxy');
 var service_info = "vehicles GPS service";
-
+var math = require('mathjs');
+var bigmath = math.create({
+  number: 'BigNumber',  // Choose 'number' (default), 'BigNumber', or 'Fraction'
+  precision: 32         // 64 by default, only applicable for BigNumbers
+});
 
 var do_get_method = function(url,cb){
 	uu_request.get(url, function(err, response, body){
@@ -38,7 +42,44 @@ var do_result = function(err,result,cb){
 	}
 };
 
+var get_info = function(data,cb){
 
+	var aj = data.aj;
+	var aw = data.aw;
+	var bj = data.bj;
+	var bw = data.bw;
+
+	var c1 = math.eval('cos((90-'+bw+') deg)');
+	console.log("c1:"+c1);
+	var c2 = math.eval('cos((90-'+aw+') deg)');
+	var s1 = math.eval('sin((90-'+bw+') deg)');
+	var s2 = math.eval('sin((90-'+aw+') deg)');
+	var c3 = math.eval('cos(('+bj+'-'+aj+') deg)');
+
+	var cos_c = math.eval(c1*c2+s1*s2*c3);
+	var cc = math.eval(cos_c+'^2');
+	var cc = math.eval('1-'+cc);
+	var sc = math.sqrt(cc);
+
+	var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
+	var ss = math.eval(s1*s3/sc);
+	console.log("ss:"+ss);
+	var hu = math.eval('asin('+ss+')');
+
+	var pi = math.PI;
+
+	var d = math.eval(hu/pi*180);
+
+	var r = 6371;
+	var l =  math.eval(hu*r);
+	console.log("d:"+d);
+	var info = {
+		"direction":d,
+		"distance":l
+	};
+	console.log("data:"+JSON.stringify(info));
+	cb(info);
+};
 exports.register = function(server, options, next){
 
 	server.route([
@@ -55,13 +96,101 @@ exports.register = function(server, options, next){
 						return reply({"success":false,"message":rows.message});
 					}
 				});
-
             }
         },
+		//计算方向
+        {
+            method: 'GET',
+            path: '/get_direction',
+            handler: function(request, reply){
+				var aj = 121.439943000000;
+				var aw = 31.343803000000;
+				var bj = 180.438083000000;
+				var bw = 180.347179000000;
 
+				var c1 = math.eval('cos((90-'+bw+') deg)');
+				var c2 = math.eval('cos((90-'+aw+') deg)');
+				var s1 = math.eval('sin((90-'+bw+') deg)');
+				var s2 = math.eval('sin((90-'+aw+') deg)');
+				var c3 = math.eval('cos(('+bj+'-'+aj+') deg)');
 
+				var cos_c = math.eval(c1*c2+s1*s2*c3);
+				var cc = math.eval(cos_c+'^2');
+				var cc = math.eval('1-'+cc);
+				var sc = math.sqrt(cc);
 
+				var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
+				var ss = math.eval(s1*s3/sc);
 
+				var hu = math.eval('asin('+ss+')');
+
+				var pi = math.PI;
+
+				var d = math.eval(hu/pi*180);
+
+				var r = 6371;
+				var l =  math.eval(hu*r);
+
+				return reply({"success":true,"d":d,"hu":hu,"l":l});
+            }
+        },
+		//接收GPS信息,新增历史记录，时时更新
+        {
+            method: 'POST',
+            path: '/receive_gps_info',
+            handler: function(request, reply){
+				var info = request.payload.info;
+				if (!info) {
+					return reply({"success":false,"message":"params wrong","service_info":service_info});
+				}
+				info = JSON.parse(info);
+				if (!info.gps_id || !info.longitude || !info.latitude
+                     || !info.time) {
+                    return reply({"success":false,"message":"params wrong","service_info":service_info});
+                }
+				server.plugins['models'].gps_history.save_history_record(info, function(err,result){
+                    if (result.affectedRows>0) {
+						server.plugins['models'].lastest_records.search_lastest_by_gps(info.gps_id,function(err,rows){
+		                    if (!err) {
+								//0新增，否者更新
+		                       if (rows.length ==0) {
+								   server.plugins['models'].lastest_records.save_lastest_record(info, function(err,result){
+				                       if (result.affectedRows>0) {
+				                           return reply({"success":true,"service_info":service_info});
+				                       }else {
+				                           return reply({"success":false,"message":result.message,"service_info":service_info});
+				                       }
+				                   });
+		                       }else {
+								   info.id = rows[0].id;
+								   var old_recode = rows[0];
+								   server.plugins['models'].lastest_records.update_lastest_record(info, function(err,result){
+				                       if (result.affectedRows>0) {
+										   var data = {
+											   "aj":info.longitude,
+											   "aw":info.latitude,
+											   "bj":info.longitude,
+											   "bw":info.latitude
+										   }
+										   get_info(data,function(data){
+
+											   return reply({"success":true,"info":data.info,"service_info":service_info});
+										   });
+				                       }else {
+				                           return reply({"success":false,"message":result.message,"service_info":service_info});
+				                       }
+				                   });
+		                       }
+		                    }else {
+		                        return reply({"success":false,"message":rows.message,"service_info":service_info});
+		                    }
+		                });
+                    }else {
+                        return reply({"success":false,"message":result.message,"service_info":service_info});
+                    }
+                });
+            }
+        },
 
 	]);
 
