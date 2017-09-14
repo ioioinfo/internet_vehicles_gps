@@ -26,6 +26,13 @@ exports.register = function(server, options, next){
         },
         {
             method: 'GET',
+            path: '/fonts/{path*}',
+            handler: {
+                directory: { path: './public/fonts' }
+            }
+        },
+        {
+            method: 'GET',
             path: '/js/{path*}',
             handler: {
                 directory: { path: './public/js' }
