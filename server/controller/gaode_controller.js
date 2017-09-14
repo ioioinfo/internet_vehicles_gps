@@ -166,8 +166,8 @@ exports.register = function(server, options, next){
 								   server.plugins['models'].lastest_records.update_lastest_record(info, function(err,result){
 				                       if (result.affectedRows>0) {
 										   var data = {
-											   "aj":info.longitude,
-											   "aw":info.latitude,
+											   "aj":rows[0].longitude,
+											   "aw":rows[0].latitude,
 											   "bj":info.longitude,
 											   "bw":info.latitude
 										   }
