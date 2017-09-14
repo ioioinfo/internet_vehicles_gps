@@ -90,8 +90,26 @@ exports.register = function(server, options, next){
 				var info = {};
 				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
                     if (!err) {
-						
-						return reply.view("homePage",{"rows":rows,"vehicles":JSON.stringify(rows)});
+						var vehicles = rows;
+						server.plugins['models'].lastest_records.get_lastest_records(info,function(err,rows){
+		                    if (!err) {
+								var drive_map = {};
+								for (var i = 0; i < rows.length; i++) {
+									var drive = rows[i];
+									drive_map[drive.gps_id] = drive;
+								}
+								for (var i = 0; i < vehicles.length; i++) {
+									var vehicle = vehicles[i];
+									if (drive_map[vehicle.gps_id]) {
+										vehicle.time = drive_map[vehicle.gps_id].time;
+									}
+								}
+
+								return reply.view("homePage",{"rows":vehicles,"vehicles":JSON.stringify(vehicles)});
+							}else {
+								return reply({"success":false,"message":rows.message});
+							}
+						});
 					}else {
 						return reply({"success":false,"message":rows.message});
 					}
@@ -174,7 +192,7 @@ exports.register = function(server, options, next){
 										   }
 										   get_info(data,function(data){
 
-											   return reply({"success":true,"info":data.info,"service_info":service_info});
+											   return reply({"success":true,"info":data,"service_info":service_info});
 										   });
 				                       }else {
 				                           return reply({"success":false,"message":result.message,"service_info":service_info});

@@ -34,7 +34,7 @@
     {% for row in rows %}
         <li class="gps" data-id="{{ row.gps_id }}">
           <p><i class="fa fa-car  state{{row.state}}"></i>{{ row.code }}</p>
-          车型：{{ row.car_brand }} 颜色：{{ row.color }} 车牌：{{ row.plate_number }} 状态：{{ row.state }}
+          车型：{{ row.car_brand }} 颜色：{{ row.color }} 车牌：{{ row.plate_number }} 状态：{{ row.state }} 最新更新时间：{{ row.time }}
         </li>
     {% endfor %}
     </ul>
