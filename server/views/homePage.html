@@ -10,7 +10,7 @@
     <div id="container" style="width:500px; height:300px"></div>
 
     {% for row in rows %}
-        <li class="gps" data-id="{{ row.gps_id }}">车型：{{ row.car_brand }} 颜色：{{ row.color }}</li>
+        <li class="gps" data-id="{{ row.gps_id }}">车型：{{ row.car_brand }} 颜色：{{ row.color }} 车牌：{{ row.plate_number }} 状态：{{ row.state }}</li>
     {% endfor %}
 
 

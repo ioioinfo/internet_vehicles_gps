@@ -90,6 +90,7 @@ exports.register = function(server, options, next){
 				var info = {};
 				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
                     if (!err) {
+						
 						return reply.view("homePage",{"rows":rows,"vehicles":JSON.stringify(rows)});
 					}else {
 						return reply({"success":false,"message":rows.message});
