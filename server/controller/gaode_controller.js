@@ -48,7 +48,13 @@ var get_info = function(data,cb){
 	var aw = data.aw;
 	var bj = data.bj;
 	var bw = data.bw;
+	var at = data.at;
+	var bt = data.bt;
+	var time = math.eval(bt+'-'+at);
+	time = math.eval(bt/3600000);
+	console.log("time:"+time);
 	console.log("data:"+JSON.stringify(data));
+
 	var c1 = math.eval('cos((90-'+bw+') deg)');
 	var c2 = math.eval('cos((90-'+aw+') deg)');
 	var s1 = math.eval('sin((90-'+bw+') deg)');
@@ -62,7 +68,7 @@ var get_info = function(data,cb){
 
 	var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
 	var ss = math.eval(s1*s3/sc);
-	console.log("ss:"+ss);
+
 	var hu = math.eval('asin('+ss+')');
 
 	var pi = math.PI;
@@ -71,10 +77,13 @@ var get_info = function(data,cb){
 
 	var r = 6371;
 	var l =  math.eval(hu*r);
+	l = math.abs(l);
 	console.log("d:"+d);
+	var s =  math.eval(l/time);
 	var info = {
 		"direction":d,
-		"distance":l
+		"distance":l,
+		"speed":s
 	};
 	console.log("data:"+JSON.stringify(info));
 	cb(info);
@@ -149,6 +158,8 @@ exports.register = function(server, options, next){
 				var r = 6371;
 				var l =  math.eval(hu*r);
 
+
+
 				return reply({"success":true,"d":d,"hu":hu,"l":l});
             }
         },
@@ -188,7 +199,9 @@ exports.register = function(server, options, next){
 											   "aj":rows[0].longitude,
 											   "aw":rows[0].latitude,
 											   "bj":info.longitude,
-											   "bw":info.latitude
+											   "bw":info.latitude,
+											   "at":rows[0].time,
+											   "bt":info.time
 										   }
 										   get_info(data,function(data){
 
