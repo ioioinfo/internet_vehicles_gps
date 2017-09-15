@@ -82,6 +82,11 @@ server.register([
     {
       register: require('./server/controller/lastest_records_controller.js')
     },
+    {
+      register: require('./server/controller/vehicles_traces_controller.js')
+    },
+
+
 
 ], function () {
     //Start the server
