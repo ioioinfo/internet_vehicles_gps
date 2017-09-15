@@ -73,8 +73,6 @@ exports.register = function(server, options, next){
 						ep.emit("num", 0);
 					}
 				});
-
-
             }
         },
         //新增
@@ -85,7 +83,7 @@ exports.register = function(server, options, next){
                 var trace = request.payload.trace;
                 trace = JSON.parse(trace);
                 if (!trace.gps_id || !trace.longitude || !trace.latitude ||
-                    !trace.car_id || !trace.direction || !trace.distance || !trace.speed || !trace.location || !trace.state || !trace.time) {
+                    !trace.direction || !trace.distance || !trace.speed || !trace.location || !trace.state || !trace.time) {
                     return reply({"success":false,"message":"params wrong","service_info":service_info});
                 }
                 // var trace = {
@@ -190,7 +188,8 @@ exports.register = function(server, options, next){
 				var trace = request.payload.trace;
                 trace = JSON.parse(trace);
                 if (!trace.gps_id || !trace.longitude || !trace.latitude ||
-                    !trace.car_id || !trace.direction || !trace.distance || !trace.speed || !trace.location || !trace.state || !trace.time) {
+                    !trace.direction || !trace.distance || !trace.speed ||
+					!trace.state || !trace.time) {
                     return reply({"success":false,"message":"params wrong","service_info":service_info});
                 }
 

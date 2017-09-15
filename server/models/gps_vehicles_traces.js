@@ -43,6 +43,21 @@ var gps_vehicles_traces = function(server) {
 				cb(false,results);
 			});
 		},
+		//获得所有地址没有更新的
+		get_location_no_update : function(cb){
+            var query = `select id, longitude, latitude
+				from gps_vehicles_traces where flag = 0
+				and updated_at > location_updated or location_updated is null
+            `;
+            server.plugins['mysql'].query(query, function(err, results) {
+                if (err) {
+                    console.log(err);
+                    cb(true,results);
+                    return;
+                }
+                cb(false,results);
+            });
+        },
 		// 保存预算
 		save_trace : function(trace, cb){
 			var query = `insert into gps_vehicles_traces (gps_id, longitude, latitude,
@@ -99,7 +114,6 @@ var gps_vehicles_traces = function(server) {
 				cb(false,results);
 			});
 		},
-
 		//删除
 		delete_trace: function(id, cb){
 			var query = `update gps_vehicles_traces set flag = 1, updated_at = now()
@@ -118,12 +132,12 @@ var gps_vehicles_traces = function(server) {
         update_trace:function(trace, cb){
             var query = `update gps_vehicles_traces set gps_id =?, longitude =?,
                 latitude =?, car_id =?, direction =?, distance =?, speed =?,
-                location =?, state =?, time =?, updated_at = now()
+                state =?, time =?, updated_at = now()
                 where gps_id = ? and flag = 0
             `;
             var coloums =[trace.gps_id, trace.longitude,
                 trace.latitude, trace.car_id, trace.direction, trace.distance,
-                trace.speed, trace.location, trace.state, trace.time, trace.gps_id
+                trace.speed, trace.state, trace.time, trace.gps_id
             ];
             server.plugins['mysql'].query(query, coloums, function(err, results) {
                 if (err) {
@@ -134,7 +148,22 @@ var gps_vehicles_traces = function(server) {
                 cb(false,results);
             });
         },
-
+		//更新地址
+		update_location:function(trace, cb){
+            var query = `update gps_vehicles_traces set location =?,
+				location_updated = now()
+                where id = ? and flag = 0
+            `;
+            var coloums =[trace.location, trace.id];
+            server.plugins['mysql'].query(query, coloums, function(err, results) {
+                if (err) {
+                    console.log(err);
+                    cb(true,results);
+                    return;
+                }
+                cb(false,results);
+            });
+        },
 
 	};
 };

@@ -8,6 +8,9 @@ var bigmath = math.create({
   number: 'BigNumber',  // Choose 'number' (default), 'BigNumber', or 'Fraction'
   precision: 32         // 64 by default, only applicable for BigNumbers
 });
+var key = "0c053bde775595e8b1b3de340265f053";
+var async = require('async');
+
 
 var do_get_method = function(url,cb){
 	uu_request.get(url, function(err, response, body){
@@ -41,9 +44,14 @@ var do_result = function(err,result,cb){
 		cb(true,null);
 	}
 };
-
+//查地址
+var get_location = function(location,cb){
+	var url = "http://restapi.amap.com/v3/geocode/regeo?output=JSON&location=";
+    url = url + location +"&key="+key;
+    do_get_method(url,cb);
+};
+//得到汽车痕迹信息
 var get_info = function(data,cb){
-
 	var aj = data.aj;
 	var aw = data.aw;
 	var bj = data.bj;
@@ -52,8 +60,6 @@ var get_info = function(data,cb){
 	var bt = data.bt;
 	var time = math.eval(bt+'-'+at);
 	time = math.eval(bt/3600000);
-	console.log("time:"+time);
-	console.log("data:"+JSON.stringify(data));
 
 	var c1 = math.eval('cos((90-'+bw+') deg)');
 	var c2 = math.eval('cos((90-'+aw+') deg)');
@@ -78,18 +84,57 @@ var get_info = function(data,cb){
 	var r = 6371;
 	var l =  math.eval(hu*r);
 	l = math.abs(l);
-	console.log("d:"+d);
+
 	var s =  math.eval(l/time);
+
+    var state = 0;
+    if (l>0) {
+        state = 1;
+    }
 	var info = {
+        "longitude":bj,
+        "latitude":bw,
 		"direction":d,
 		"distance":l,
-		"speed":s
+		"speed":s,
+        "time":bt,
+        "state":state
 	};
-	console.log("data:"+JSON.stringify(info));
+
 	cb(info);
 };
-exports.register = function(server, options, next){
 
+exports.register = function(server, options, next){
+    //新增，或者更新痕迹信息
+    var do_trace = function(data,cb){
+        if (!data.gps_id || !data.longitude || !data.latitude ||
+            !data.direction || !data.speed || !data.location || !data.state || !data.time) {
+            cb(true,"trace params wrong");
+        }
+        server.plugins['models'].gps_vehicles_traces.search_trace_by_gps(data.gps_id,function(err,rows){
+            if (!err) {
+                if (rows.length ==0) {
+                    server.plugins['models'].gps_vehicles_traces.save_trace(data, function(err,result){
+                        if (result.affectedRows>0) {
+                            cb(false,null);
+                        }else {
+                            cb(true,result.message);
+                        }
+                    });
+                }else {
+                    server.plugins['models'].gps_vehicles_traces.update_trace(data, function(err,result){
+                        if (result.affectedRows>0) {
+                            cb(false,null);
+                        }else {
+                            cb(true,null);
+                        }
+                    });
+                }
+            }else {
+                cb(true,rows.message);
+            }
+        });
+    };
 	server.route([
         //主页
         {
@@ -123,6 +168,81 @@ exports.register = function(server, options, next){
 						return reply({"success":false,"message":rows.message});
 					}
 				});
+            }
+        },
+        //批量更新地址
+        {
+            method: 'GET',
+            path: '/get_location_no_update',
+            handler: function(request, reply){
+				var info = {};
+				server.plugins['models'].gps_vehicles_traces.get_location_no_update(function(err,rows){
+                    if (!err) {
+                        var update_fail = [];
+                        var update_success = [];
+                        async.eachLimit(rows,1, function(row, cb) {
+                            var bj = row.longitude;
+                        	var bw = row.latitude;
+                            var location = [];
+                            location.push(bj);
+                            location.push(bw);
+                            get_location(location,function(err,content){
+                                if (content.status == 1) {
+                                    row.location = content.regeocode.formatted_address;
+                                    if (row.location == "" || !row.location) {
+    									update_fail.push(row.id);
+                                        cb();
+                                    }else {
+                                        server.plugins['models'].gps_vehicles_traces.update_location(row, function(err,result){
+                                            if (result.affectedRows>0) {
+                                                update_success.push(row.id);
+                                                cb();
+                                            }else {
+                                                console.log(result.message);
+            									update_fail.push(row.id);
+                                                cb();
+                                            }
+                                        });
+                                    }
+                                }else {
+                                    console.log(content.message);
+									update_fail.push(row.id);
+                                    cb();
+                                }
+                            });
+
+        				}, function(err) {
+        					if (err) {
+        						console.error("err: " + err);
+        					}
+        					return reply({"success":true,"success_num":update_success.length,"fail_ids":update_fail,"fail_num":update_fail.length,"service_info":service_info});
+        				});
+
+					}else {
+						return reply({"success":false,"message":rows.message});
+					}
+				});
+            }
+        },
+        //查地址
+        {
+            method: 'GET',
+            path: '/get_location',
+            handler: function(request, reply){
+                var bj = 116.481488;
+            	var bw = 39.990464;
+                var location = [];
+                location.push(bj);
+                location.push(bw);
+                get_location(location,function(err,content){
+                    if (content.status == 1) {
+                        return reply({"success":true,"message":content.regeocode.formatted_address});
+                    }else {
+                        return reply({"success":false,"message":content.info});
+                    }
+                });
+
+
             }
         },
 		//计算方向
@@ -191,26 +311,56 @@ exports.register = function(server, options, next){
 				                       }
 				                   });
 		                       }else {
-								   info.id = rows[0].id;
-								   var old_recode = rows[0];
-								   server.plugins['models'].lastest_records.update_lastest_record(info, function(err,result){
-				                       if (result.affectedRows>0) {
-										   var data = {
-											   "aj":rows[0].longitude,
-											   "aw":rows[0].latitude,
-											   "bj":info.longitude,
-											   "bw":info.latitude,
-											   "at":rows[0].time,
-											   "bt":info.time
-										   }
-										   get_info(data,function(data){
-
-											   return reply({"success":true,"info":data,"service_info":service_info});
-										   });
-				                       }else {
-				                           return reply({"success":false,"message":result.message,"service_info":service_info});
-				                       }
-				                   });
+                                   if (rows[0].longitude == info.longitude || rows[0].latitude == info.latitude  ) {
+                                       return reply({"success":false,"message":"no move","service_info":service_info});
+                                   }else {
+                                       info.id = rows[0].id;
+    								   var old_recode = rows[0];
+    								   server.plugins['models'].lastest_records.update_lastest_record(info, function(err,result){
+    				                       if (result.affectedRows>0) {
+    										   var data = {
+    											   "aj":rows[0].longitude,
+    											   "aw":rows[0].latitude,
+    											   "bj":info.longitude,
+    											   "bw":info.latitude,
+    											   "at":rows[0].time,
+    											   "bt":info.time
+    										   }
+    										   get_info(data,function(data){
+                                                   data.gps_id = info.gps_id;
+                                                   console.log("data:"+JSON.stringify(data));
+                                                   if (!data.gps_id || !data.longitude || !data.latitude ||!data.direction || !data.speed || !data.state || !data.time) {
+                                                       return reply({"success":false,"message":"trace params wrong","service_info":service_info});
+                                                   }
+                                                   server.plugins['models'].gps_vehicles_traces.search_trace_by_gps(data.gps_id,function(err,rows){
+                                                       if (!err) {
+                                                           if (rows.length ==0) {
+                                                               server.plugins['models'].gps_vehicles_traces.save_trace(data, function(err,result){
+                                                                   if (result.affectedRows>0) {
+                                                                       return reply({"success":true,"message":"add new trace","service_info":service_info});
+                                                                   }else {
+                                                                       return reply({"success":false,"message":result.mesmessage,"service_info":service_info});
+                                                                   }
+                                                               });
+                                                           }else {
+                                                               server.plugins['models'].gps_vehicles_traces.update_trace(data, function(err,result){
+                                                                   if (result.affectedRows>0) {
+                                                                       return reply({"success":true,"message":"update success ","service_info":service_info});
+                                                                   }else {
+                                                                       return reply({"success":false,"message":result.mesmessage,"service_info":service_info});
+                                                                   }
+                                                               });
+                                                           }
+                                                       }else {
+                                                           return reply({"success":false,"message":rows.mesmessage,"service_info":service_info});
+                                                       }
+                                                   });
+    										   });
+    				                       }else {
+    				                           return reply({"success":false,"message":"location no change","service_info":service_info});
+    				                       }
+    				                   });
+                                   }
 		                       }
 		                    }else {
 		                        return reply({"success":false,"message":rows.message,"service_info":service_info});
