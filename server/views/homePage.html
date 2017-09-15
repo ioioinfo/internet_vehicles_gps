@@ -7,13 +7,101 @@
 <script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
 <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
 <style media="screen">
+*,p{
+  padding: 0;
+}
+body{
+  background: #dcdcdc;
+}
   #container{
     float: left;
-    width:70%;
+    width:60%;
     height:300px ;
   }
+  .car_infor_list{
+    float: right;
+    width: 30%;
+
+  }
+  ul{
+    width: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin: 0;
+  }
+  .car_infor_list li p{
+    height: 21px;
+    line-height: 21px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .car_infor_list li p span:last-child{
+    float: right;
+  }
   li{
+    width: 100%;
     list-style: none;
+    padding: 7px;
+    background: #fff;
+    border-right: 4px solid #dcdcdc;
+    box-sizing: border-box;
+    cursor: pointer;
+    margin-bottom: 7px;
+    border-radius: 6px;
+  }
+  @media screen and (min-width:1360px){
+    #container{
+      width: 810px;
+    }
+    li{
+      margin-bottom: 7px;
+      width: 50%;
+    }
+    .car_infor_list{
+      min-width: 500px;
+    }
+  }
+
+  @media screen and (max-width:890px){
+    #container{
+      width: 100%;
+    }
+    .car_infor_list{
+      min-width: 100%;;
+    }
+    li{
+      margin-bottom: 7px;
+      width: 33.3%;
+    }
+  }
+  @media screen and (max-width:768px){
+    #container{
+      width: 100%;
+    }
+    .car_infor_list{
+      min-width: 100%;;
+    }
+    li{
+      margin-bottom: 7px;
+      width: 50%;
+    }
+  }
+  @media screen and (max-width:665px){
+    #container{
+      width: 100%;
+    }
+    .car_infor_list{
+      min-width: 100%;;
+    }
+    li{
+      margin-bottom: 7px;
+      width: 100%;
+    }
   }
   i{
     margin: 0 30px;
@@ -25,23 +113,54 @@
   .state1{
     color: red;
   }
+  .car_titile{
+    text-align: center;
+  }
+  .color{
+    color: #666;
+  }
+  input{
+    border: none;
+    outline-style: none;
+    padding: 7px 0 ;
+    text-indent: 10px;
+  }
+  .input{
+    margin: 17px 0;
+
+  }
+  button{
+    padding: 5px 7px ;
+    border: 1px solid #fff;
+    background: #3388FF;
+    color: #FFF;
+    vertical-align: bottom;
+  }
 </style>
 </head>
 <body>
     <div id="container"></div>
+    <div class="car_infor_list">
+      <div class="input"><input type="text" placeholder="搜索"/><button>查找</button></div>
+      <ul class="">
 
-    <ul>
-    {% for row in rows %}
-        <li class="gps" data-id="{{ row.gps_id }}">
-          <p><i class="fa fa-car  state{{row.state}}"></i>{{ row.code }}</p>
-          车型：{{ row.car_brand }} 颜色：{{ row.color }} 车牌：{{ row.plate_number }} 状态：{{ row.state }} 最新更新时间：{{ row.time }}
-        </li>
-    {% endfor %}
-    </ul>
+      {% for row in rows %}
+          <li class="gps" data-id="{{ row.gps_id }}">
+            <p class="car_titile"><i class="fa fa-car  state{{row.state}}"></i>{{ row.code }}</p>
+            <p><span>车型：{{ row.car_brand }}</span> <span>颜色：{{ row.color }}</span></p>
+            <p> <span>车牌：{{ row.plate_number }} </span><span >状态：<e class="state">{{ row.state }}</e></span></p>
+            <p> 最新更新时间：{{ row.time }}</p>
+          </li>
+      {% endfor %}
+      </ul>
+    </div>
 
 
 
 <script>
+window.onload=function(){
+  $('.input input').focus();
+}
 $(function(){
     var infoWindow;
     var vehicles = {{vehicles|safe}};
