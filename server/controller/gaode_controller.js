@@ -58,8 +58,24 @@ var get_info = function(data,cb){
 	var bw = data.bw;
 	var at = data.at;
 	var bt = data.bt;
-	var time = math.eval(bt+'-'+at);
-	time = math.eval(bt/3600000);
+	var ti = math.eval(bt+'-'+at);
+
+    if (ti==0) {
+        var info = {
+            "longitude":bj,
+            "latitude":bw,
+    		"direction":0,
+    		"distance":0,
+    		"speed":0,
+            "time":bt,
+            "state":1
+    	};
+
+        cb(info);
+        return;
+    }
+
+	var time = math.eval(ti/3600000);
 
 	var c1 = math.eval('cos((90-'+bw+') deg)');
 	var c2 = math.eval('cos((90-'+aw+') deg)');
@@ -91,7 +107,8 @@ var get_info = function(data,cb){
     if (l>0) {
         state = 1;
     }
-	var info = {
+
+    var info= {
         "longitude":bj,
         "latitude":bw,
 		"direction":d,
@@ -318,6 +335,9 @@ exports.register = function(server, options, next){
     								   var old_recode = rows[0];
     								   server.plugins['models'].lastest_records.update_lastest_record(info, function(err,result){
     				                       if (result.affectedRows>0) {
+                                               if (!rows[0].time) {
+                                                   rows[0].time = info.time;
+                                               }
     										   var data = {
     											   "aj":rows[0].longitude,
     											   "aw":rows[0].latitude,
@@ -326,10 +346,11 @@ exports.register = function(server, options, next){
     											   "at":rows[0].time,
     											   "bt":info.time
     										   }
+                                               console.log("data:"+JSON.stringify(data));
     										   get_info(data,function(data){
                                                    data.gps_id = info.gps_id;
                                                    console.log("data:"+JSON.stringify(data));
-                                                   if (!data.gps_id || !data.longitude || !data.latitude ||!data.direction || !data.speed || !data.state || !data.time) {
+                                                   if (!data.gps_id || !data.longitude || !data.latitude || !data.state || !data.time) {
                                                        return reply({"success":false,"message":"trace params wrong","service_info":service_info});
                                                    }
                                                    server.plugins['models'].gps_vehicles_traces.search_trace_by_gps(data.gps_id,function(err,rows){

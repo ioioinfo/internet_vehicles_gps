@@ -9,6 +9,12 @@ var vehicles = function(server) {
                 state, DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at,
                 updated_at from vehicles where flag = 0
             `;
+			var colums=[];
+			
+			if (info.plate_number) {
+				query = query + " and plate_number = ? ";
+				colums.push(info.plate_number);
+			}
 
 			if (info.thisPage) {
                 var offset = info.thisPage-1;
@@ -18,7 +24,7 @@ var vehicles = function(server) {
                     query = query + " limit " + offset*20 + ",20";
                 }
             }
-            server.plugins['mysql'].query(query, function(err, results) {
+            server.plugins['mysql'].query(query,colums, function(err, results) {
                 if (err) {
                     console.log(err);
                     cb(true,results);
