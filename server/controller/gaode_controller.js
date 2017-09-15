@@ -169,10 +169,11 @@ exports.register = function(server, options, next){
 									var drive = rows[i];
 									drive_map[drive.gps_id] = drive;
 								}
+                                console.log("drive_map:"+JSON.stringify(drive_map));
 								for (var i = 0; i < vehicles.length; i++) {
 									var vehicle = vehicles[i];
 									if (drive_map[vehicle.gps_id]) {
-										vehicle.time = drive_map[vehicle.gps_id].time;
+										vehicle.time = drive_map[vehicle.gps_id].created_at;
 									}
 								}
 

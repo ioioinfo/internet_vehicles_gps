@@ -16,7 +16,7 @@ body{
   #container{
     float: left;
     width:60%;
-    height:300px ;
+    height:600px ;
   }
   .car_infor_list{
     float: right;
@@ -200,6 +200,7 @@ $(function(){
         var gps_id = $(this).data("id");
         for (var i = 0; i < vehicles.length; i++) {
             if (vehicles[i].gps_id==gps_id) {
+                console.log(location_map[gps_id].longitude+","+location_map[gps_id].latitude);
                 map.setCenter([location_map[gps_id].longitude,location_map[gps_id].latitude]);
             }
         }
@@ -212,14 +213,16 @@ $(function(){
                 //地图对象，中心位置，比例
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
-                    zoom: 10
+                    zoom: 12,
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
                     map.addControl(new AMap.ToolBar());
-                    map.addControl(new AMap.Scale());
-                    map.addControl(new AMap.OverView({isOpen:true}));
+                    // map.addControl(new AMap.Scale());
+                    // map.addControl(new AMap.OverView({isOpen:true}));
                 });
+                //map.setZoomAndCenter(16, [rows[0].longitude,rows[0].latitude]);
+
                 //信息框对象
                 var infoWindow = new AMap.InfoWindow();
                 for (var i = 0; i < rows.length; i++) {
@@ -245,7 +248,7 @@ $(function(){
                     //设置地图中心点位置
                     map.setCenter(e.target.getPosition());
                 };
-                map.setFitView();
+                //map.setFitView();
                 //点击事件
                 // AMap.event.addListener(marker, 'click', function() {
                 //     infoWindow.open(map, marker.getPosition());
@@ -262,7 +265,7 @@ $(function(){
                 // });
                 // infoWindow.open(map, map.getCenter());
 
-                setTimeout(vehicles_run,3000);
+                // setTimeout(vehicles_run,3000);
 
             }else {
                 alert(data.message);
