@@ -175,6 +175,11 @@ exports.register = function(server, options, next){
 									if (drive_map[vehicle.gps_id]) {
 										vehicle.time = drive_map[vehicle.gps_id].created_at;
 									}
+                                    if (vehicle.state ==1) {
+                                        vehicle.state_name ="运动中";
+                                    }else if (vehicle.state ==0) {
+                                        vehicle.state_name ="静止";
+                                    }
 								}
 
 								return reply.view("homePage",{"rows":vehicles,"vehicles":JSON.stringify(vehicles)});
