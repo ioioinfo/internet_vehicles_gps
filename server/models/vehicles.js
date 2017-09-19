@@ -10,10 +10,10 @@ var vehicles = function(server) {
                 updated_at from vehicles where flag = 0
             `;
 			var colums=[];
-			
+
 			if (info.plate_number) {
-				query = query + " and plate_number = ? ";
-				colums.push(info.plate_number);
+				query = query + " and plate_number like ? ";
+				colums.push('%'+info.plate_number+'%');
 			}
 
 			if (info.thisPage) {
