@@ -15,6 +15,8 @@
     }
     body{
       background: #f4f4f4;
+      overflow: hidden;
+      margin: 0;
     }
     li{
       list-style: none;
@@ -100,110 +102,31 @@
       color: #FFF;
       vertical-align: bottom;
     }
+    .title{
+      text-align: center;
+      line-height: 37px;
+      height: 37px;
+      background: #0094AE;
+      color: #fff;
+      margin: 0;
+      margin-bottom: 4px;
+    }
+    .car_ul{
+      overflow-y: auto;
+    }
 </style>
 </head>
 <body>
     <div id="gps"></div>
+  <script>
+    window.onload=function(){
+      $('.input input').focus();
+      var width = $('#container').width();
+      console.log(width);
+      $('#container').css('height',0.58*width);
+      $('.car_ul').css('height',0.58*width);
+    }
 
-    <script type="text/babel">
-    class Wrap extends React.Component {
-      constructor(props) {
-          super(props);
-          this.handleClick=this.handleClick.bind(this);
-          this.state={list:[]};
-      }
-      // 页面发生变化的时候触发
-      componentDidMount() {
-        $.ajax({
-           url: "/car_infos",
-           dataType: 'json',
-           type: 'GET',
-           success: function(data) {
-             if(data.success){
-               this.setState({list:data.rows});
-             }
-           }.bind(this),
-           error: function(xhr, status, err) {
-           }.bind(this)
-          });
-      }
-      handleClick(e){
-        var plate_number = $('#plate_number').val();
-        console.log(plate_number);
-        var params = {'plate_number':plate_number};
-
-        $.ajax({
-           url: "/car_infos",
-           dataType: 'json',
-           type: 'GET',
-           data: {"params":JSON.stringify(params)},
-           success: function(data) {
-             if(data.success){
-               this.setState({list:data.rows});
-             }else {
-               alert('没有找到该车辆');
-             }
-           }.bind(this),
-           error: function(xhr, status, err) {
-           }.bind(this)
-          });
-      }
-
-      render() {
-
-          return (
-            <div className="wrap">
-              <div id="container"></div>
-              <div className="middle"></div>
-              <div className="car_infor_list">
-                <div className="input"><input type="text" id="plate_number" placeholder="搜索"/><button id="button" onClick={this.handleClick}>查找</button></div>
-                <ul className="">
-                  {this.state.list.map((item,index) => (
-                    <LI item={item} key={index}/>
-                  ))}
-
-                </ul>
-              </div>
-            </div>
-          );
-      }
-    };
-
-    class LI extends React.Component {
-
-      render() {
-          var clas='state'+this.props.item.state;
-          return (
-            <li className="gps" data-id={ this.props.item.gps_id }>
-              <p className="car_titile ">
-                <div className={clas}><i className="fa fa-car car"></i>{this.props.item.code }</div>
-                <span>车型：<e>{ this.props.item.car_brand }</e></span> <span>颜色：<e>{ this.props.item.color }</e></span>
-                <span>车牌：<e>{ this.props.item.plate_number }</e> </span><span >状态：<e className="state">{ this.props.item.state_name }</e></span>
-                <span>方向：<e>{ this.props.item.direction }°</e> </span><span >速度：<e className="state">{ this.props.item.speed }km/h</e></span>
-                <span> 行驶：<e>{this.props.item.distance }km</e></span>
-                <span> 最新坐标：<e>[{this.props.item.longitude },{ this.props.item.longitude }]</e></span>
-                <span> 最新位置：<e>{ this.props.item.location }</e></span>
-                <span> 最新更新时间：<e>{ this.props.item.time }</e></span>
-              </p>
-            </li>
-          );
-      }
-    };
-
-
-    ReactDOM.render(
-      <Wrap/>,
-      document.getElementById("gps")
-    );
-    </script>
-<script>
-window.onload=function(){
-  $('.input input').focus();
-  var width = $('#container').width();
-  console.log(width);
-  $('#container').css('height',0.65*width);
-}
-$(function(){
     var infoWindow;
     var vehicles = {{vehicles|safe}};
 
@@ -235,15 +158,6 @@ $(function(){
     var markers = {};
     var map;
     var location_map = {};
-    $(".gps").click(function(){
-        var gps_id = $(this).data("id");
-        for (var i = 0; i < vehicles.length; i++) {
-            if (vehicles[i].gps_id==gps_id) {
-                console.log(location_map[gps_id].longitude+","+location_map[gps_id].latitude);
-                map.setCenter([location_map[gps_id].longitude,location_map[gps_id].latitude]);
-            }
-        }
-    });
 
     function init(){
         $.get("/get_lastest_records",function(data){
@@ -353,8 +267,112 @@ $(function(){
         // });
 
     };
+  </script>
+    <script type="text/babel">
+    class Wrap extends React.Component {
+      constructor(props) {
+          super(props);
+          this.handleClick=this.handleClick.bind(this);
+          this.state={list:[]};
+      }
+      // 页面发生变化的时候触发
+      componentDidMount() {
+        $.ajax({
+           url: "/car_infos",
+           dataType: 'json',
+           type: 'GET',
+           success: function(data) {
+             if(data.success){
+               this.setState({list:data.rows});
+             }
+           }.bind(this),
+           error: function(xhr, status, err) {
+           }.bind(this)
+          });
+      }
+      handleClick(e){
+        var plate_number = $('#plate_number').val();
+        console.log(plate_number);
+        var params = {'plate_number':plate_number};
 
-})
-</script>
+        $.ajax({
+           url: "/car_infos",
+           dataType: 'json',
+           type: 'GET',
+           data: {"params":JSON.stringify(params)},
+           success: function(data) {
+             if(data.success){
+               this.setState({list:data.rows});
+             }else {
+               alert('没有找到该车辆');
+             }
+           }.bind(this),
+           error: function(xhr, status, err) {
+           }.bind(this)
+          });
+      }
+
+      render() {
+          return (
+            <div className="car_wrap">
+              <p className="title">车联网云平台</p>
+              <div className="wrap">
+                <div id="container"></div>
+                <div className="middle"></div>
+                <div className="car_infor_list">
+                  <div className="input"><input type="text" id="plate_number" placeholder="搜索"/><button id="button" onClick={this.handleClick}>查找</button></div>
+                  <ul className="car_ul">
+                    {this.state.list.map((item,index) => (
+                      <LI item={item} key={index} list={this.state.list}/>
+                    ))}
+
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+      }
+    };
+
+    class LI extends React.Component {
+      constructor(props) {
+          super(props);
+          this.handleAddress=this.handleAddress.bind(this);
+      }
+      handleAddress(e){
+        var gps_id = $(e.target).data("id");
+        var list = this.props.list;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].gps_id==gps_id) {
+                console.log(location_map[gps_id].longitude+","+location_map[gps_id].latitude);
+                map.setCenter([location_map[gps_id].longitude,location_map[gps_id].latitude]);
+            }
+        }
+      }
+      render() {
+          var clas='state'+this.props.item.state;
+          return (
+            <li className="gps">
+              <p className="car_titile ">
+                <div className={clas} onClick={this.handleAddress} data-id={ this.props.item.gps_id }><i className="fa fa-car car" data-id={ this.props.item.gps_id }></i>{this.props.item.code }</div>
+                <span>车型：<e>{ this.props.item.car_brand }</e></span> <span>颜色：<e>{ this.props.item.color }</e></span>
+                <span>车牌：<e>{ this.props.item.plate_number }</e> </span><span >状态：<e className="state">{ this.props.item.state_name }</e></span>
+                <span>方向：<e>{ this.props.item.direction }°</e> </span><span >速度：<e className="state">{ this.props.item.speed }km/h</e></span>
+                <span> 行驶：<e>{this.props.item.distance }km</e></span>
+                <span> 最新坐标：<e>[{this.props.item.longitude },{ this.props.item.longitude }]</e></span>
+                <span> 最新位置：<e>{ this.props.item.location }</e></span>
+                <span> 最新更新时间：<e>{ this.props.item.time }</e></span>
+              </p>
+            </li>
+          );
+      }
+    };
+
+
+    ReactDOM.render(
+      <Wrap/>,
+      document.getElementById("gps")
+    );
+    </script>
 </body>
 </html>
