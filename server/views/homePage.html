@@ -165,7 +165,8 @@
                 //地图对象，中心位置，比例
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
-                    zoom: 12,
+                    zoom: 14,
+                    mapStyle: 'amap://styles/whitesmoke'//样式URL
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
