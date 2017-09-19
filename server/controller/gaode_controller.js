@@ -214,6 +214,7 @@ exports.register = function(server, options, next){
                                     row.location = content.regeocode.formatted_address;
                                     if (row.location == "" || !row.location) {
     									update_fail.push(row.id);
+                                        console.log("id"+row.id+": 查到的地址为空，不能更新地址");
                                         cb();
                                     }else {
                                         server.plugins['models'].gps_vehicles_traces.update_location(row, function(err,result){
@@ -228,7 +229,7 @@ exports.register = function(server, options, next){
                                         });
                                     }
                                 }else {
-                                    console.log(content.message);
+                                    console.log(content.info);
 									update_fail.push(row.id);
                                     cb();
                                 }
@@ -252,8 +253,10 @@ exports.register = function(server, options, next){
             method: 'GET',
             path: '/get_location',
             handler: function(request, reply){
-                var bj = 116.481488;
-            	var bw = 39.990464;
+                var bj = 0.000000002593;
+            	var bw = 0.000000002593;
+                // var bj = 116.481488;
+            	// var bw = 39.990464;
                 var location = [];
                 location.push(bj);
                 location.push(bw);
