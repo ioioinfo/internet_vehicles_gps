@@ -203,7 +203,13 @@ exports.register = function(server, options, next){
             method: 'GET',
             path: '/car_infos',
             handler: function(request, reply){
-				var info = {};
+                var params = request.query.params;
+                var info = {};
+                if (params) {
+                    info = params;
+                    info = JSON.parse(params);
+                }
+
 				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
                     if (!err) {
 						var vehicles = rows;
