@@ -209,7 +209,6 @@ exports.register = function(server, options, next){
                     info = params;
                     info = JSON.parse(params);
                 }
-
 				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
                     if (!err) {
 						var vehicles = rows;
