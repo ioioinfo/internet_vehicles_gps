@@ -2,10 +2,13 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>主页</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>车联网云平台</title>
 <link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/jquery.mCustomScrollbar.min.css">
 <script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
 <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
+<script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
 <script src="js/react.min.js"></script>
 <script src="js/react-dom.min.js"></script>
 <script src="js/browser.min.js"></script>
@@ -24,7 +27,7 @@
       background: #fff;
       padding: 10px 0 0 10px;
     }
-    .wrap{
+    .wrap,.display{
       display: -webkit-box;
       display: -webkit-flex;
       display: -ms-flexbox;
@@ -36,20 +39,29 @@
     #container{
       width:70%;
     }
+    .infor_span{
+      display: inline-block;
+      width: 50%;
+      box-sizing: border-box;
+    }
     .car_infor_list{
       width: 28%;
 
       padding-left: 10px;
       box-sizing: border-box;
+      position: relative;
     }
     .middle{
-      width: 2%;
+      width: 1%;
     }
     .state0{
-      color: #666;
+      color: green;
     }
     .state1{
       color: red;
+    }
+    .state2{
+      color: #666;
     }
     .car{
       margin-right: 17px;
@@ -58,12 +70,12 @@
       margin: 0;
     }
     .gps p span{
-      margin-right: 17px;
       padding:7px;
       display: inline-block;
     }
     e{
       font-size: 12px;
+      color: #928371;
     }
     @media screen and (max-width:681px){
       #container{
@@ -92,8 +104,8 @@
       border-bottom-left-radius: 4px;
     }
     .input{
-      margin: 17px 0;
-
+      position: fixed;
+      top: 50px;
     }
     button{
       padding: 5px 7px ;
@@ -113,6 +125,12 @@
     }
     .car_ul{
       overflow-y: auto;
+      margin-top: 63px;
+    }
+    .red{
+      color: red;
+      margin-top:37px;
+      text-align: center;
     }
 </style>
 </head>
@@ -123,7 +141,8 @@
       $('.input input').focus();
       var width = $('#container').width();
       $('#container').css('height',0.58*width);
-      $('.car_ul').css('height',0.58*width);
+      var win_height = $(window).height();
+      $('#scrollbar1').css('height',win_height - 159);
     }
 
     var infoWindow;
@@ -165,7 +184,7 @@
                 //地图对象，中心位置，比例
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
-                    zoom: 12,
+                    zoom: 14,
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
@@ -269,12 +288,41 @@
   </script>
     <script type="text/babel">
     class Wrap extends React.Component {
+      // 页面发生变化的时候触发
+      componentDidMount() {
+        $(function(){
+          $("#scrollbar1").mCustomScrollbar({
+            axis:"y",
+            theme:"dark"
+          });
+        })
+
+      }
+
+      render() {
+          return (
+            <div className="car_wrap">
+              <p className="title">车联网云平台</p>
+              <div className="wrap">
+                <div id="container"></div>
+                <div className="middle"></div>
+                <div className="car_infor_list" id="scrollbar1">
+                <Right/>
+                </div>
+                <div className="middle"></div>
+              </div>
+            </div>
+          );
+      }
+    };
+
+    class Right extends React.Component {
       constructor(props) {
           super(props);
           this.handleClick=this.handleClick.bind(this);
           this.state={list:[]};
       }
-      // 页面发生变化的时候触发
+
       componentDidMount() {
         $.ajax({
            url: "/car_infos",
@@ -291,7 +339,6 @@
       }
       handleClick(e){
         var plate_number = $('#plate_number').val();
-        console.log(plate_number);
         var params = {'plate_number':plate_number};
 
         $.ajax({
@@ -303,7 +350,6 @@
              if(data.success){
                this.setState({list:data.rows});
              }else {
-               alert('没有找到该车辆');
              }
            }.bind(this),
            error: function(xhr, status, err) {
@@ -312,22 +358,24 @@
       }
 
       render() {
-          return (
-            <div className="car_wrap">
-              <p className="title">车联网云平台</p>
-              <div className="wrap">
-                <div id="container"></div>
-                <div className="middle"></div>
-                <div className="car_infor_list">
-                  <div className="input"><input type="text" id="plate_number" placeholder="搜索"/><button id="button" onClick={this.handleClick}>查找</button></div>
-                  <ul className="car_ul">
-                    {this.state.list.map((item,index) => (
-                      <LI item={item} key={index} list={this.state.list}/>
-                    ))}
+        var infor;
+        if (this.state.list.length==0) {
+          infor = (<p className="red"><span >*未找到该车辆</span></p>);
+        }else {
+          infor = (<ul className="car_ul">
+           {this.state.list.map((item,index) => (
+             <LI item={item} key={index} list={this.state.list}/>
+           ))}
+         </ul>);
+        }
 
-                  </ul>
-                </div>
+          return (
+            <div className="">
+              <div className="input">
+                <input type="text" id="plate_number" placeholder="搜索"/>
+                <button id="button" onClick={this.handleClick}>查找</button>
               </div>
+              {infor}
             </div>
           );
       }
@@ -354,13 +402,18 @@
             <li className="gps">
               <p className="car_titile ">
                 <div className={clas} onClick={this.handleAddress} data-id={ this.props.item.gps_id }><i className="fa fa-car car" data-id={ this.props.item.gps_id }></i>{this.props.item.code }</div>
-                <span>车型：<e>{ this.props.item.car_brand }</e></span> <span>颜色：<e>{ this.props.item.color }</e></span>
-                <span>车牌：<e>{ this.props.item.plate_number }</e> </span><span >状态：<e className="state">{ this.props.item.state_name }</e></span>
-                <span>方向：<e>{ this.props.item.direction }°</e> </span><span >速度：<e className="state">{ this.props.item.speed }km/h</e></span>
-                <span> 行驶：<e>{this.props.item.distance }km</e></span>
-                <span> 最新坐标：<e>[{this.props.item.longitude },{ this.props.item.latitude }]</e></span>
-                <span> 最新位置：<e>{ this.props.item.location }</e></span>
-                <span> 最新更新时间：<e>{ this.props.item.time }</e></span>
+                <div className="display">
+                  <span className="infor_span">车型：<e>{ this.props.item.car_brand }</e></span>
+                  <span className="infor_span">颜色：<e>{ this.props.item.color }</e></span>
+                  <span className="infor_span">车牌：<e>{ this.props.item.plate_number }</e></span>
+                  <span className="infor_span">状态：<e className="state">{ this.props.item.state_name }</e></span>
+                  <span className="infor_span">方向：<e>{ this.props.item.direction }°</e> </span>
+                  <span className="infor_span">速度：<e className="state">{ this.props.item.speed }km/h</e></span>
+                  <span className="infor_span"> 行驶：<e>{this.props.item.distance }km</e></span>
+                </div>
+                <span> 最新坐标：<e>[{this.props.item.longitude },{ this.props.item.latitude }]</e></span><br/>
+                <span> 最新位置：<e>{ this.props.item.location }</e></span><br/>
+                <span> 最后更新：<e>{ this.props.item.time }</e></span>
               </p>
             </li>
           );
