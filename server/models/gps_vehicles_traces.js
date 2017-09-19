@@ -6,8 +6,7 @@ var gps_vehicles_traces = function(server) {
 		//获得所有GPS历史
 		get_vehicles_traces : function(info, cb){
             var query = `select id, gps_id, longitude, latitude, car_id,
-                direction, distance, speed, location, state,
-                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+                direction, distance, speed, location, state, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at,
                 updated_at from gps_vehicles_traces where flag = 0
             `;
@@ -84,8 +83,7 @@ var gps_vehicles_traces = function(server) {
 		//查询预算
 		search_trace_byId : function(id, cb){
 			var query = `select id, gps_id, longitude, latitude, car_id,
-                direction, distance, speed, location, state,
-                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+                direction, distance, speed, location, state, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at
 			    from gps_vehicles_traces where flag = 0 and id = ?
 			`;
@@ -100,8 +98,7 @@ var gps_vehicles_traces = function(server) {
 		},
         search_trace_by_gps : function(gps_id, cb){
 			var query = `select id, gps_id, longitude, latitude, car_id,
-                direction, distance, speed, location, state,
-                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+                direction, distance, speed, location, state, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at
 			    from gps_vehicles_traces where flag = 0 and gps_id = ?
 			`;

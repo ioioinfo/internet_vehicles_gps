@@ -5,8 +5,7 @@ var lastest_records = function(server) {
 	return {
 		//获得所有GPS历史
 		get_lastest_records : function(info, cb){
-            var query = `select id, gps_id, longitude, latitude,
-                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+            var query = `select id, gps_id, longitude, latitude, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at,
                 updated_at from lastest_records where flag = 0
             `;
@@ -63,8 +62,7 @@ var lastest_records = function(server) {
 		},
 		//查询预算
 		search_lastest_byId : function(id, cb){
-			var query = `select id, gps_id, longitude, latitude,
-                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+			var query = `select id, gps_id, longitude, latitude, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at
 			    from lastest_records where flag = 0 and id = ?
 			`;
@@ -79,8 +77,7 @@ var lastest_records = function(server) {
 		},
 		//查询
 		search_lastest_by_gps : function(gps_id, cb){
-			var query = `select id, gps_id, longitude, latitude,
-                DATE_FORMAT(time,'%Y-%m-%d %H:%i:%S')time,
+			var query = `select id, gps_id, longitude, latitude, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at
 			    from lastest_records where flag = 0 and gps_id = ?
 			`;

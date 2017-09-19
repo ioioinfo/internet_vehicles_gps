@@ -68,7 +68,7 @@ var get_info = function(data,cb){
     		"distance":0,
     		"speed":0,
             "time":bt,
-            "state":1
+            "state":0
     	};
 
         cb(info);
@@ -162,24 +162,24 @@ exports.register = function(server, options, next){
 				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
                     if (!err) {
 						var vehicles = rows;
-						server.plugins['models'].lastest_records.get_lastest_records(info,function(err,rows){
+						server.plugins['models'].gps_vehicles_traces.get_vehicles_traces(info,function(err,rows){
 		                    if (!err) {
-								var drive_map = {};
+								var trace_map = {};
 								for (var i = 0; i < rows.length; i++) {
-									var drive = rows[i];
-									drive_map[drive.gps_id] = drive;
+									var trace = rows[i];
+									trace_map[trace.gps_id] = trace;
 								}
-                                console.log("drive_map:"+JSON.stringify(drive_map));
 								for (var i = 0; i < vehicles.length; i++) {
 									var vehicle = vehicles[i];
-									if (drive_map[vehicle.gps_id]) {
-										vehicle.time = drive_map[vehicle.gps_id].created_at;
+									if (trace_map[vehicle.gps_id]) {
+										vehicle.time = trace_map[vehicle.gps_id].created_at;
+                                        if (trace_map[vehicle.gps_id].state ==1) {
+                                            vehicle.state_name ="运动中";
+                                        }else if (trace_map[vehicle.gps_id].state ==0) {
+                                            vehicle.state_name ="静止";
+                                        }
+                                        vehicle.location = trace_map[vehicle.gps_id].location;
 									}
-                                    if (vehicle.state ==1) {
-                                        vehicle.state_name ="运动中";
-                                    }else if (vehicle.state ==0) {
-                                        vehicle.state_name ="静止";
-                                    }
 								}
 
 								return reply.view("homePage",{"rows":vehicles,"vehicles":JSON.stringify(vehicles)});
@@ -352,10 +352,8 @@ exports.register = function(server, options, next){
     											   "at":rows[0].time,
     											   "bt":info.time
     										   }
-                                               console.log("data:"+JSON.stringify(data));
     										   get_info(data,function(data){
                                                    data.gps_id = info.gps_id;
-                                                   console.log("data:"+JSON.stringify(data));
                                                    if (!data.gps_id || !data.longitude || !data.latitude || !data.state || !data.time) {
                                                        return reply({"success":false,"message":"trace params wrong","service_info":service_info});
                                                    }
