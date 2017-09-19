@@ -151,8 +151,8 @@ body{
             <p class="car_titile"><i class="fa fa-car  state{{row.state}}"></i>{{ row.code }}</p>
             <p><span>车型：{{ row.car_brand }}</span> <span>颜色：{{ row.color }}</span></p>
             <p> <span>车牌：{{ row.plate_number }} </span><span >状态：<e class="state">{{ row.state_name }}</e></span></p>
-            <p> <span>方向：{{ row.direction }} </span><span >速度：<e class="state">{{ row.speed }}</e></span></p>
-            <p> 行驶：{{ row.distance }}k</p>
+            <p> <span>方向：{{ row.direction }}° </span><span >速度：<e class="state">{{ row.speed }}km/h</e></span></p>
+            <p> 行驶：{{ row.distance }}km</p>
             <p> 最新坐标：[{{ row.longitude }},{{ row.longitude }}]</p>
             <p> 最新位置：{{ row.location }}</p>
             <p> 最新更新时间：{{ row.time }}</p>

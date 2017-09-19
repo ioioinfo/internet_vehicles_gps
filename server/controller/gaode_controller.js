@@ -198,6 +198,51 @@ exports.register = function(server, options, next){
 				});
             }
         },
+        //car_info
+        {
+            method: 'GET',
+            path: '/car_infos',
+            handler: function(request, reply){
+				var info = {};
+				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
+                    if (!err) {
+						var vehicles = rows;
+						server.plugins['models'].gps_vehicles_traces.get_vehicles_traces(info,function(err,rows){
+		                    if (!err) {
+								var trace_map = {};
+								for (var i = 0; i < rows.length; i++) {
+									var trace = rows[i];
+									trace_map[trace.gps_id] = trace;
+								}
+								for (var i = 0; i < vehicles.length; i++) {
+									var vehicle = vehicles[i];
+									if (trace_map[vehicle.gps_id]) {
+										vehicle.time = trace_map[vehicle.gps_id].created_at;
+                                        if (trace_map[vehicle.gps_id].state ==1) {
+                                            vehicle.state_name ="运动中";
+                                        }else if (trace_map[vehicle.gps_id].state ==0) {
+                                            vehicle.state_name ="静止";
+                                        }
+                                        vehicle.location = trace_map[vehicle.gps_id].location;
+                                        vehicle.speed = trace_map[vehicle.gps_id].speed;
+                                        vehicle.direction = trace_map[vehicle.gps_id].direction;
+                                        vehicle.distance = trace_map[vehicle.gps_id].distance;
+                                        vehicle.longitude = trace_map[vehicle.gps_id].longitude;
+                                        vehicle.latitude = trace_map[vehicle.gps_id].latitude;
+									}
+								}
+								return reply({"success":true,"rows":vehicles});
+							}else {
+								return reply({"success":false,"message":rows.message});
+							}
+						});
+					}else {
+						return reply({"success":false,"message":rows.message});
+					}
+				});
+            }
+        },
+
         //批量更新地址
         {
             method: 'GET',
