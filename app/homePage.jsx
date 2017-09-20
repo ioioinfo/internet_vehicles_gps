@@ -42,7 +42,6 @@ function car(state = [], action) {
 let store = createStore(car);
 
 const mapStateToProps = (state) => {
-    console.log(state);
     return {
         list: state
     }
@@ -127,7 +126,6 @@ class LI extends React.Component {
     var list = this.props.list;
     for (var i = 0; i < list.length; i++) {
         if (list[i].gps_id==gps_id) {
-            console.log(location_map[gps_id].longitude+","+location_map[gps_id].latitude);
             map.setCenter([location_map[gps_id].longitude,location_map[gps_id].latitude]);
         }
     }
