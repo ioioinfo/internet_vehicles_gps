@@ -137,8 +137,13 @@
   <script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
   <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
   <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     window.onload=function(){
+      var login_cookie = {{login_cookie|safe}};
+      var socket = io();
+      socket.emit('cookie', login_cookie);
+
       $('.input input').focus();
       var width = $('#container').width();
       $('#container').css('height',0.58*width);
@@ -265,7 +270,6 @@
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
                     zoom: 14,
-
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
@@ -275,7 +279,35 @@
                 });
                 //map.setZoomAndCenter(16, [rows[0].longitude,rows[0].latitude]);
 
-                addCars(rows);
+                //信息框对象
+                var infoWindow = new AMap.InfoWindow();
+                for (var i = 0; i < rows.length; i++) {
+                    location_map[rows[i].gps_id] = rows[i];
+                    var marker;
+                    //汽车标记
+                    marker = new AMap.Marker({
+                        icon : icon,//24px*24px
+                        position : [rows[i].longitude,rows[i].latitude],
+                        offset : new AMap.Pixel(-12,-12),
+                        map : map
+                    });
+                    //弹出信息框
+                    marker.content='我是第'+rows[i].gps_id+'GPS定位器';
+                    marker.on('click',markerClick);
+                    marker.emit('click',{target:marker});
+                    markers[rows[i].gps_id] = marker;
+                    marker.setMap(null);
+                    marker.setContent();
+
+
+                }
+                //点击事件
+                function markerClick(e){
+                    infoWindow.setContent(e.target.content);
+                    infoWindow.open(map, e.target.getPosition());
+                    //设置地图中心点位置
+                    map.setCenter(e.target.getPosition());
+                };
                 //map.setFitView();
                 //点击事件
                 // AMap.event.addListener(marker, 'click', function() {
