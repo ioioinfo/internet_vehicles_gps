@@ -139,6 +139,10 @@
   <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
   <script>
     window.onload=function(){
+      var login_cookie = {{login_cookie|safe}};
+      var socket = io();
+      socket.emit('cookie', login_cookie);
+
       $('.input input').focus();
       var width = $('#container').width();
       $('#container').css('height',0.58*width);
@@ -186,10 +190,6 @@
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
                     zoom: 14,
-<<<<<<< HEAD
-                    mapStyle: 'amap://styles/whitesmoke'//样式URL
-=======
->>>>>>> d089e5ff9238bd5c9d3eb2dfacd97bbb8f542c1b
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
