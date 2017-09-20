@@ -11361,7 +11361,6 @@ function car() {
 var store = (0, _redux.createStore)(car);
 
 var mapStateToProps = function mapStateToProps(state) {
-  console.log(state);
   return {
     list: state
   };
@@ -11513,7 +11512,6 @@ var LI = function (_React$Component3) {
       var list = this.props.list;
       for (var i = 0; i < list.length; i++) {
         if (list[i].gps_id == gps_id) {
-          console.log(location_map[gps_id].longitude + "," + location_map[gps_id].latitude);
           map.setCenter([location_map[gps_id].longitude, location_map[gps_id].latitude]);
         }
       }
