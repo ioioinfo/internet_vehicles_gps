@@ -11351,6 +11351,7 @@ function car() {
       }
     case 'GET_DATA':
       {
+        refreshCar(action.data);
         return action.data;
       }
     default:
