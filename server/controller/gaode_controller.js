@@ -120,8 +120,26 @@ var get_info = function(data,cb){
 
 	cb(info);
 };
+//登入账号验证
+var do_login = function(data, cb){
+	var url = "http://139.196.148.40:18666/user/login_check";
+	data.platform_code = "drp_pos";
+	do_post_method(url,data,cb);
+};
+//获取当前login_cookie
+var get_login_cookie = function(request){
+	var login_cookie;
+	if (request.state && request.state.cookie) {
+		var cookie = request.state.cookie;
+		if (cookie.login_cookie) {
+			login_cookie = cookie.login_cookie;
+		}
+	}
+	return login_cookie;
+};
 
 exports.register = function(server, options, next){
+    var i18n = server.plugins.i18n;
     //新增，或者更新痕迹信息
     var do_trace = function(data,cb){
         if (!data.gps_id || !data.longitude || !data.latitude ||
@@ -158,6 +176,10 @@ exports.register = function(server, options, next){
             method: 'GET',
             path: '/',
             handler: function(request, reply){
+                var login_cookie = get_login_cookie(request);
+				if (!login_cookie) {
+					login_cookie = uuidV1();
+				}
 				var info = {};
 				server.plugins['models'].vehicles.get_vehicles(info,function(err,rows){
                     if (!err) {
@@ -187,7 +209,7 @@ exports.register = function(server, options, next){
 									}
 								}
 
-								return reply.view("homePage",{"rows":vehicles,"vehicles":JSON.stringify(vehicles)});
+								return reply.view("homePage",{"rows":vehicles,"vehicles":JSON.stringify(vehicles),"login_cookie":JSON.stringify(login_cookie)});
 							}else {
 								return reply({"success":false,"message":rows.message});
 							}
@@ -247,7 +269,6 @@ exports.register = function(server, options, next){
 				});
             }
         },
-
         //批量更新地址
         {
             method: 'GET',
@@ -455,6 +476,40 @@ exports.register = function(server, options, next){
                 });
             }
         },
+        //用户登入
+		{
+			method: 'GET',
+			path: '/login',
+			handler: function(request, reply){
+				return reply.view("login");
+			}
+		},
+        //pos登入
+        {
+            method: 'POST',
+            path: '/do_login',
+            handler: function(request, reply){
+                var data = {};
+                data.username = request.payload.username;
+                data.password = request.payload.password;
+                data.org_code = "ioio";
+
+                do_login(data, function(err,row){
+                    if (!err) {
+                        var cookie = request.state.cookie;
+                        if (!cookie) {
+                            cookie = {};
+                        }
+                        cookie.login_cookie = uuidV1();
+                        return reply({"success":true,"service_info":service_info}).state('cookie', cookie, {ttl:1000*365*24*60*60*1000});
+                    } else {
+                        return reply({"success":false,"message":i18n._n(row.message)});
+                    }
+                });
+
+            }
+        },
+
 
 	]);
 

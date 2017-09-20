@@ -23,7 +23,11 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 $(function () {
+  var cookie = {{cookie|safe}};
   var socket = io();
+
+  socket.emit('cookie', cookie);
+
   $('form').submit(function(){
     socket.emit('chat message', $('#m').val());
     $('#m').val('');
