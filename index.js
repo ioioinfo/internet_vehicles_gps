@@ -51,6 +51,13 @@ server.register([
     {
       register: require('./server/db/db_mysql.js')
     },
+    {
+        register: require('./server/utils/g.js'),
+        options: require('./view_globals.js')
+    },
+    {
+        register: require('./server/utils/i18n.js')
+    },
 	{
       register: require('./server/assets/index.js')
     },

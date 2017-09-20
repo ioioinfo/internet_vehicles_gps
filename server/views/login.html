@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>车享网平台</title>
+	<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js" type="text/javascript"></script>
+    <style media="screen">
+        *{
+        padding: 0;
+        margin: 0;
+        }
+        a{
+        text-decoration: none;
+        color: #000;
+        }
+        li{
+        list-style: none;
+        }
+        .touming{
+        width: 258px;
+        height: 252px;
+        background: #fff;
+        opacity: 0.2;
+        border-radius: 4px;
+        position: absolute;
+        left:360px;
+        top: 70px;
+        }
+        .warp{
+        width: 980px;
+        height: 510px;
+        margin: 70px auto 0;
+        background: url(images/ba_05.jpg)no-repeat;
+        background-size: cover;
+        position: relative;
+
+        }
+        .login{
+        width: 258px;
+        position: absolute;
+        top: 0;
+        left: 360px;
+        text-align: center;
+        }
+        .login-top{
+        padding-top: 90px;
+        }
+        .login-radio{
+        float: left;
+        width: 45%;
+        }
+        .login-radio-span{
+        font-size: 12px;
+
+        }
+        .login-radio-input{
+        vertical-align: middle;
+        }
+        .login-number{
+        color: #999;
+        width: 206px;
+        border: 1px solid #c4c4c4;
+        vertical-align: middle;
+        height: 18px;
+        padding: 10px;
+        line-height: 18px;
+        margin: 15px 0 5px;
+        }
+        .login-accounts-img{
+        background: url(images/login_user.png) no-repeat 0 0;
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        top: 140px;
+        left: 204px;
+        }
+        .login-password-img{
+        background: url(images/login_user.png) no-repeat -17px 0;
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        top: 200px;
+        left: 204px;
+        }
+        .clear{
+        clear: both;
+        }
+        .login-verification{
+        width: 115px;
+        float: left;
+        }
+        .login-word{
+        width: 94px;
+        height: 28px;
+        line-height: 28px;
+        float: right;
+        margin-top: 17px;
+        margin-right: 26px;
+        }
+        .word-1{
+        color: red;
+        }
+        .word-2{
+        color: black;
+        }
+        .word-3{
+        color: blue;
+        }
+        .word-4{
+        color: yellow;
+        }
+        .login-submit{
+        display: inline-block;
+        width: 228px;
+        height: 42px;
+        line-height: 42px;
+        text-align: center;
+        border: 0;
+        cursor: pointer;
+        text-decoration: none;
+        vertical-align: middle;
+        margin-top: 18px;
+        color: #fff;
+        background: #00516c;
+        }
+        .login-submit:hover{
+        background: #004359;
+        }
+        .login-zhuce{
+        text-align: left;
+        }
+        .login-zhuce span:last-child{
+        display: inline-block;
+        margin-left: 105px;
+        }
+        .login-zhuce span a{
+        font-size:12px;
+        color: #fff;
+        }
+        .login-bottom-ul{
+        width: 80px;
+        height: 20px;
+        margin: 20px 0 0 165px;
+        display: flex;
+        position: relative;
+        }
+        .login-bottom-ul li{
+        flex: 1;
+        }
+        .login-bottom-ul .size{
+        width: 20px;
+        height: 20px;
+        margin: 0 auto;
+        }
+        .login-bottom-ul .qq{
+        background: url(images/qq.png) no-repeat 0 0;
+        background-size: contain;
+        }
+        .login-bottom-ul .weixin{
+        background: url(images/weixin1.png) no-repeat 0 0;
+        background-size: contain;
+        }
+        .alertinfor{
+        width: 227px;
+        border:1px solid #00516C;
+        background: #fff;
+        color: #6C6C6C;
+        text-indent: 10px;
+        display: none;
+        padding: 2px 0;
+        font-weight: normal;
+        font-size: 12px;
+        border-radius: 2px;
+        position: absolute;
+        top: 78px;
+        left: 15px;
+        }
+        .alertinfor img{
+            vertical-align: sub;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="warp">
+        <div class="touming"></div>
+      <div class="login">
+        <ul class="login-top">
+          <li class="alertinfor"><img src="images/danger.png" alt="" ><span></span></li>
+          <li class="login_title">车享网登录</li>
+          <li><input type="text" id="username" name="" value="" placeholder="请输入账号" class="login-accounts login-number"></li>
+          <li><input type="password" id="password" name="" value="" placeholder="请输入密码" class="login-password login-number"></li>
+
+          <div class="login-accounts-img"></div>
+          <div class="login-password-img"></div>
+        </ul>
+        <button class="login-submit">登录</button>
+
+      </div>
+
+    </div>
+	<script>
+	$(function() {
+		// src="data:image/png;base64,
+
+        var login=function(){
+          username = $("#username").val();
+          password = $ ("#password").val();
+          vertify = $("#vertify").val();
+
+              if (!username) {
+                  $(".alertinfor").show();
+                 $(".alertinfor span").html("请输入账号");
+                  return;
+              }else if (!password) {
+                  $(".alertinfor").show();
+                  $(".alertinfor span").html("请输入密码");
+                  return;
+              }
+                $.post("/do_login",{"username":username,"password":password},function(data){
+                  if (data.success) {
+                      location.href = "/";
+                    }else {
+                        $(".alertinfor").show();
+                        $(".alertinfor span").html(data.message);
+                    }
+                })
+          };
+
+	      $(".login-submit").click(login);
+
+
+        $('input:first').focus();
+        var $inp = $('input');
+        $inp.bind('keydown', function (e) {
+            var key = e.which;
+            if (key == 13) {
+                e.preventDefault();
+                if(!$(this).val()){
+                    return;
+                }else {
+                    var nxtIdx = $inp.index(this) + 1;
+                    $(":input:eq(" + nxtIdx + ")").not(".login-submit").select();
+                }
+
+            }
+        });
+        $("#vertify").bind('keydown', function (e) {
+            var key = e.which;
+            if (key == 13) {
+
+                login();
+            }
+
+        })
+	});
+	</script>
+  </body>
+</html>

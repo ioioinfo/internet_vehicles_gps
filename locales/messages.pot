@@ -1,0 +1,15 @@
+# common message
+msgid "network error"
+msgstr ""
+
+# ioio_authority service auth_controller
+msgid "login error"
+msgstr ""
+
+msgid "has no store role"
+msgstr ""
+
+
+# drp_pos service pos_controller
+msgid "vertify wrong"
+msgstr ""

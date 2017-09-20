@@ -2,13 +2,11 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>主页</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>车联网云平台</title>
 <link rel="stylesheet" href="css/font-awesome.min.css">
-<script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
-<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
-<script src="js/react.min.js"></script>
-<script src="js/react-dom.min.js"></script>
-<script src="js/browser.min.js"></script>
+<link rel="stylesheet" href="css/jquery.mCustomScrollbar.min.css">
+
 <style media="screen">
     *,p{
       padding: 0;
@@ -24,7 +22,7 @@
       background: #fff;
       padding: 10px 0 0 10px;
     }
-    .wrap{
+    .wrap,.display{
       display: -webkit-box;
       display: -webkit-flex;
       display: -ms-flexbox;
@@ -36,20 +34,29 @@
     #container{
       width:70%;
     }
+    .infor_span{
+      display: inline-block;
+      width: 50%;
+      box-sizing: border-box;
+    }
     .car_infor_list{
       width: 28%;
 
       padding-left: 10px;
       box-sizing: border-box;
+      position: relative;
     }
     .middle{
-      width: 2%;
+      width: 1%;
     }
     .state0{
-      color: #666;
+      color: green;
     }
     .state1{
       color: red;
+    }
+    .state2{
+      color: #666;
     }
     .car{
       margin-right: 17px;
@@ -58,12 +65,12 @@
       margin: 0;
     }
     .gps p span{
-      margin-right: 17px;
       padding:7px;
       display: inline-block;
     }
     e{
       font-size: 12px;
+      color: #928371;
     }
     @media screen and (max-width:681px){
       #container{
@@ -92,7 +99,9 @@
       border-bottom-left-radius: 4px;
     }
     .input{
-      margin: 17px 0;
+      position: absolute;
+      top: -2px;
+      right: 1%;
 
     }
     button{
@@ -100,7 +109,7 @@
       border: 1px solid #fff;
       background: #3388FF;
       color: #FFF;
-      vertical-align: bottom;
+      vertical-align: middle;
     }
     .title{
       text-align: center;
@@ -110,20 +119,31 @@
       color: #fff;
       margin: 0;
       margin-bottom: 4px;
+      position: relative;
+
     }
     .car_ul{
       overflow-y: auto;
     }
+    .red{
+      color: red;
+      margin-top:37px;
+      text-align: center;
+    }
 </style>
 </head>
 <body>
-    <div id="gps"></div>
+  <div id="gps"></div>
+  <script src="js/jquery-3.1.1.min.js"type="text/javascript"></script>
+  <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
+  <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
   <script>
     window.onload=function(){
       $('.input input').focus();
       var width = $('#container').width();
       $('#container').css('height',0.58*width);
-      $('.car_ul').css('height',0.58*width);
+      var win_height = $(window).height();
+      $('#scrollbar1').css('height',win_height - 159);
     }
 
     var infoWindow;
@@ -166,7 +186,10 @@
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
                     zoom: 14,
+<<<<<<< HEAD
                     mapStyle: 'amap://styles/whitesmoke'//样式URL
+=======
+>>>>>>> d089e5ff9238bd5c9d3eb2dfacd97bbb8f542c1b
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
@@ -268,111 +291,7 @@
 
     };
   </script>
-    <script type="text/babel">
-    class Wrap extends React.Component {
-      constructor(props) {
-          super(props);
-          this.handleClick=this.handleClick.bind(this);
-          this.state={list:[]};
-      }
-      // 页面发生变化的时候触发
-      componentDidMount() {
-        $.ajax({
-           url: "/car_infos",
-           dataType: 'json',
-           type: 'GET',
-           success: function(data) {
-             if(data.success){
-               this.setState({list:data.rows});
-             }
-           }.bind(this),
-           error: function(xhr, status, err) {
-           }.bind(this)
-          });
-      }
-      handleClick(e){
-        var plate_number = $('#plate_number').val();
-        console.log(plate_number);
-        var params = {'plate_number':plate_number};
 
-        $.ajax({
-           url: "/car_infos",
-           dataType: 'json',
-           type: 'GET',
-           data: {"params":JSON.stringify(params)},
-           success: function(data) {
-             if(data.success){
-               this.setState({list:data.rows});
-             }else {
-               alert('没有找到该车辆');
-             }
-           }.bind(this),
-           error: function(xhr, status, err) {
-           }.bind(this)
-          });
-      }
-
-      render() {
-          return (
-            <div className="car_wrap">
-              <p className="title">车联网云平台</p>
-              <div className="wrap">
-                <div id="container"></div>
-                <div className="middle"></div>
-                <div className="car_infor_list">
-                  <div className="input"><input type="text" id="plate_number" placeholder="搜索"/><button id="button" onClick={this.handleClick}>查找</button></div>
-                  <ul className="car_ul">
-                    {this.state.list.map((item,index) => (
-                      <LI item={item} key={index} list={this.state.list}/>
-                    ))}
-
-                  </ul>
-                </div>
-              </div>
-            </div>
-          );
-      }
-    };
-
-    class LI extends React.Component {
-      constructor(props) {
-          super(props);
-          this.handleAddress=this.handleAddress.bind(this);
-      }
-      handleAddress(e){
-        var gps_id = $(e.target).data("id");
-        var list = this.props.list;
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].gps_id==gps_id) {
-                console.log(location_map[gps_id].longitude+","+location_map[gps_id].latitude);
-                map.setCenter([location_map[gps_id].longitude,location_map[gps_id].latitude]);
-            }
-        }
-      }
-      render() {
-          var clas='state'+this.props.item.state;
-          return (
-            <li className="gps">
-              <p className="car_titile ">
-                <div className={clas} onClick={this.handleAddress} data-id={ this.props.item.gps_id }><i className="fa fa-car car" data-id={ this.props.item.gps_id }></i>{this.props.item.code }</div>
-                <span>车型：<e>{ this.props.item.car_brand }</e></span> <span>颜色：<e>{ this.props.item.color }</e></span>
-                <span>车牌：<e>{ this.props.item.plate_number }</e> </span><span >状态：<e className="state">{ this.props.item.state_name }</e></span>
-                <span>方向：<e>{ this.props.item.direction }°</e> </span><span >速度：<e className="state">{ this.props.item.speed }km/h</e></span>
-                <span> 行驶：<e>{this.props.item.distance }km</e></span>
-                <span> 最新坐标：<e>[{this.props.item.longitude },{ this.props.item.latitude }]</e></span>
-                <span> 最新位置：<e>{ this.props.item.location }</e></span>
-                <span> 最新更新时间：<e>{ this.props.item.time }</e></span>
-              </p>
-            </li>
-          );
-      }
-    };
-
-
-    ReactDOM.render(
-      <Wrap/>,
-      document.getElementById("gps")
-    );
-    </script>
+  <script src="js/app/homePage.js"></script>
 </body>
 </html>
