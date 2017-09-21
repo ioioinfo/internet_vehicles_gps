@@ -32,6 +32,7 @@ function car(state = [], action) {
     }
   case 'GET_DATA':
   {
+    refreshCar(action.data);
     return action.data;
   }
   default:

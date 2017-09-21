@@ -182,7 +182,86 @@
     var markers = {};
     var map;
     var location_map = {};
+    //信息框对象
+    var infoWindow = new AMap.InfoWindow();
 
+    //添加车辆
+    function addCars(rows) {
+      for (var i = 0; i < rows.length; i++) {
+          location_map[rows[i].gps_id] = rows[i];
+          var marker;
+          //汽车标记
+          marker = new AMap.Marker({
+              icon : icon,//24px*24px
+              position : [rows[i].longitude,rows[i].latitude],
+              offset : new AMap.Pixel(-12,-12),
+              map : map
+          });
+          //弹出信息框
+          //marker.content='我是第'+rows[i].gps_id+'GPS定位器';
+          marker.on('click',markerClick);
+          //marker.emit('click',{target:marker});
+          markers[rows[i].gps_id] = marker;
+
+          if (i == 0) {
+            //设置地图中心点位置
+            map.setCenter(marker.getPosition());
+          }
+      }
+      //点击事件
+      function markerClick(e){
+          infoWindow.setContent(e.target.content);
+          infoWindow.open(map, e.target.getPosition());
+          //设置地图中心点位置
+          map.setCenter(e.target.getPosition());
+      };
+    }
+
+    //刷新地图车辆
+    function refreshCar(list){
+      var addList = [];
+      var deleteList = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var exists = false;
+        for (var j = 0; j < vehicles.length; j++) {
+          if(list[i].gps_id==vehicles[j].gps_id){
+            exists = true;
+          }
+        }
+
+        if (!exists) {
+          addList.push(list[i]);
+          map.add(addList);
+        }
+      }
+
+      for (var i = 0; i < vehicles.length; i++) {
+        var exists = false;
+        for (var j = 0; j < list.length; j++) {
+          if(list[j].gps_id==vehicles[i].gps_id){
+            exists = true;
+          }
+        }
+
+        if (!exists) {
+          deleteList.push(vehicles[i].gps_id);
+        }
+      }
+
+      var deleteMarkers = [];
+      for (var i = 0; i < deleteList.length; i++) {
+        deleteMarkers.push(markers[deleteList[i]]);
+      }
+      if (map && deleteMarkers.length > 0) {
+        map.remove(deleteMarkers);
+      }
+
+
+      addCars(addList);
+
+      vehicles = list;
+    }
     function init(){
         $.get("/get_lastest_records",function(data){
             if (data.success) {
