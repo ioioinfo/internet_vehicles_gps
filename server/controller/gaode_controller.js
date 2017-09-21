@@ -289,9 +289,17 @@ exports.register = function(server, options, next){
                                 if (content.status == 1) {
                                     row.location = content.regeocode.formatted_address;
                                     if (row.location == "" || !row.location) {
-    									update_fail.push(row.id);
-                                        console.log("id"+row.id+": 查到的地址为空，不能更新地址");
-                                        cb();
+                                        row.location = "未知地址";
+                                        server.plugins['models'].gps_vehicles_traces.update_location(row, function(err,result){
+                                            if (result.affectedRows>0) {
+                                                update_success.push(row.id);
+                                                cb();
+                                            }else {
+                                                console.log(result.message);
+            									update_fail.push(row.id);
+                                                cb();
+                                            }
+                                        });
                                     }else {
                                         server.plugins['models'].gps_vehicles_traces.update_location(row, function(err,result){
                                             if (result.affectedRows>0) {

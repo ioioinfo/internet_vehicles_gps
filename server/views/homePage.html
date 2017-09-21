@@ -217,9 +217,6 @@
                     marker.on('click',markerClick);
                     marker.emit('click',{target:marker});
                     markers[rows[i].gps_id] = marker;
-                    marker.setMap(null);
-                    marker.setContent();
-
 
                 }
                 //点击事件
@@ -266,7 +263,7 @@
                 maker.setIcon(icon4);
                 maker.moveTo([122.438083000000,32.347179000000],300);
                 var a = maker.getPosition();
-
+                
             }
         }
 
