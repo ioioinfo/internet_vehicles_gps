@@ -194,7 +194,7 @@ exports.register = function(server, options, next){
 								for (var i = 0; i < vehicles.length; i++) {
 									var vehicle = vehicles[i];
 									if (trace_map[vehicle.gps_id]) {
-										vehicle.time = trace_map[vehicle.gps_id].created_at;
+										vehicle.time = trace_map[vehicle.gps_id].updated_at;
                                         if (trace_map[vehicle.gps_id].state ==1) {
                                             vehicle.state_name ="运动中";
                                         }else if (trace_map[vehicle.gps_id].state ==0) {
@@ -244,7 +244,7 @@ exports.register = function(server, options, next){
 								for (var i = 0; i < vehicles.length; i++) {
 									var vehicle = vehicles[i];
 									if (trace_map[vehicle.gps_id]) {
-										vehicle.time = trace_map[vehicle.gps_id].created_at;
+										vehicle.time = trace_map[vehicle.gps_id].updated_at;
                                         if (trace_map[vehicle.gps_id].state ==1) {
                                             vehicle.state_name ="运动中";
                                         }else if (trace_map[vehicle.gps_id].state ==0) {

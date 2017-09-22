@@ -8,7 +8,7 @@ var gps_vehicles_traces = function(server) {
             var query = `select id, gps_id, longitude, latitude, car_id,
                 direction, distance, speed, location, state, time,
                 DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%S')created_at,
-                updated_at from gps_vehicles_traces where flag = 0
+                DATE_FORMAT(updated_at,'%Y-%m-%d %H:%i:%S')updated_at from gps_vehicles_traces where flag = 0
             `;
 
 			if (info.thisPage) {
