@@ -72,7 +72,7 @@
       font-size: 12px;
       color: #928371;
     }
-    @media screen and (max-width:681px){
+    @media screen and (max-width:740px){
       #container{
         width:100%;
       }
@@ -144,7 +144,6 @@
       var socket = io();
       socket.emit('cookie', login_cookie);
 
-      $('.input input').focus();
       var width = $('#container').width();
       $('#container').css('height',0.58*width);
       var win_height = $(window).height();
@@ -342,7 +341,7 @@
                 maker.setIcon(icon4);
                 maker.moveTo([122.438083000000,32.347179000000],300);
                 var a = maker.getPosition();
-                
+
             }
         }
 
