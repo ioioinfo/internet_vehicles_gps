@@ -1,4 +1,5 @@
 // Base routes for item..
+const gps = require('../utils/gps');
 const uu_request = require('../utils/uu_request');
 const uuidV1 = require('uuid/v1');
 var eventproxy = require('eventproxy');
@@ -150,7 +151,29 @@ exports.register = function(server, options, next){
 
             }
         },
+		//查询路线
+		{
+			method: 'GET',
+			path: '/get_paths',
+			handler: function(request, reply){
+				var info = {};
+				var points = [];
+                server.plugins['models'].gps_history.get_history_records(info,function(err,rows){
+                    if (!err) {
+						for (var i = 0; i < rows.length; i++) {
+							var row = rows[i];
+							var point = gps.gcj_encrypt(row.latitude,row.longitude);
 
+							points.push({"name":row.id,"lnglat":[point.longitude,point.latitude]});
+						}
+
+						return reply({"success":true,"rows":points,"service_info":service_info});
+					}else {
+						return reply({"success":false,"message":rows.message,"service_info":service_info});
+					}
+				});
+			}
+		},
 
 
 	]);

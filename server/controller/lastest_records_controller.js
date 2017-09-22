@@ -1,4 +1,5 @@
 // Base routes for item..
+const gps = require('../utils/gps');
 const uu_request = require('../utils/uu_request');
 const uuidV1 = require('uuid/v1');
 var eventproxy = require('eventproxy');
@@ -61,6 +62,12 @@ exports.register = function(server, options, next){
                 //查询所有渠道部门
                 server.plugins['models'].lastest_records.get_lastest_records(info,function(err,rows){
                     if (!err) {
+						for (var i = 0; i < rows.length; i++) {
+							var row = rows[i];
+							var point = gps.gcj_encrypt(row.latitude,row.longitude);
+							row.latitude = point.latitude;
+							row.longitude = point.longitude;
+						}
 						ep.emit("rows", rows);
 					}else {
 						ep.emit("rows", []);
