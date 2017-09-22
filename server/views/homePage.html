@@ -138,7 +138,9 @@
   <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=0c053bde775595e8b1b3de340265f053"></script>
   <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="//webapi.amap.com/ui/1.0/main.js?v=1.0.11"></script>
   <script>
+
     window.onload=function(){
       var login_cookie = {{login_cookie|safe}};
       var socket = io();
@@ -268,7 +270,7 @@
                 //地图对象，中心位置，比例
                 map = new AMap.Map('container', {
                     center: [rows[0].longitude,rows[0].latitude],
-                    zoom: 14,
+                    zoom: 15,
                 });
                 //地图工具，调节街市省，比例，鹰眼
                 map.plugin(["AMap.ToolBar","AMap.Scale","AMap.OverView"], function() {
@@ -278,51 +280,69 @@
                 });
                 //map.setZoomAndCenter(16, [rows[0].longitude,rows[0].latitude]);
 
-                //信息框对象
-                var infoWindow = new AMap.InfoWindow();
-                for (var i = 0; i < rows.length; i++) {
-                    location_map[rows[i].gps_id] = rows[i];
-                    var marker;
-                    //汽车标记
-                    marker = new AMap.Marker({
-                        icon : icon,//24px*24px
-                        position : [rows[i].longitude,rows[i].latitude],
-                        offset : new AMap.Pixel(-12,-12),
-                        map : map
+                addCars(rows);
+
+                //地图
+                AMapUI.load(['ui/misc/PathSimplifier', 'lib/$'], function(PathSimplifier, $) {
+
+                    if (!PathSimplifier.supportCanvas) {
+                        alert('当前环境不支持 Canvas！');
+                        return;
+                    }
+
+                    var pathSimplifierIns = new PathSimplifier({
+                        zIndex: 100,
+                        autoSetFitView:false,
+                        map: map, //所属的地图实例
+
+                        getPath: function(pathData, pathIndex) {
+                            var points = pathData.points,
+                                lnglatList = [];
+
+                            for (var i = 0, len = points.length; i < len; i++) {
+                                lnglatList.push(points[i].lnglat);
+                            }
+
+                            return lnglatList;
+                        },
+                        getHoverTitle: function(pathData, pathIndex, pointIndex) {
+                            if (pointIndex >= 0) {
+                                //point
+                                return pathData.name + '，' + pathData.points[pointIndex].name;
+                            }
+
+                            return pathData.name + '，点数量' + pathData.points.length;
+                        },
+                        renderOptions: {
+                            renderAllPointsIfNumberBelow: -1, //绘制路线节点，如不需要可设置为-1
+                            pathLineStyle: {
+                               lineWidth: 3
+                           },
+                           pathLineSelectedStyle: {
+                               lineWidth: 5
+                           }
+                        }
                     });
-                    //弹出信息框
-                    marker.content='我是第'+rows[i].gps_id+'GPS定位器';
-                    marker.on('click',markerClick);
-                    marker.emit('click',{target:marker});
-                    markers[rows[i].gps_id] = marker;
 
-                }
-                //点击事件
-                function markerClick(e){
-                    infoWindow.setContent(e.target.content);
-                    infoWindow.open(map, e.target.getPosition());
-                    //设置地图中心点位置
-                    map.setCenter(e.target.getPosition());
-                };
-                //map.setFitView();
-                //点击事件
-                // AMap.event.addListener(marker, 'click', function() {
-                //     infoWindow.open(map, marker.getPosition());
-                // })
-                //构建信息窗体中显示的内容
-                // var content=[];
-                // content.push("GPS："+rows[i].gps_id);
-                // content.push("纬度："+rows[i].longitude);
-                // content.push("经度："+rows[i].latitude);
-                // content.push('<a href="http://ditu.amap.com/detail/B000A8URXB?citycode=110105" target="_blank">详细信息</a>');
-                //
-                // infoWindow = new AMap.InfoWindow({
-                //     content: content.join("<br>")  //使用默认信息窗体框样式，显示信息内容
-                // });
-                // infoWindow.open(map, map.getCenter());
+                    window.pathSimplifierIns = pathSimplifierIns;
 
-                // setTimeout(vehicles_run,3000);
+                    //设置数据
+                    $.get("/get_paths",function(data){
+                        if (data.success) {
+                            pathSimplifierIns.setData([{
+                                name: '路线0',
+                                points: data.rows
+                            }]);
 
+                            //选中路线0
+                            pathSimplifierIns.setSelectedPathIndex(0);
+                        }
+                    });
+
+                    //pathSimplifierIns.on('pointClick', function(e, info) {
+                    //    console.log('Click: ' + info.pathData.points[info.pointIndex].name);
+                    //});
+                });
             }else {
                 alert(data.message);
             };
@@ -331,7 +351,6 @@
     $(function(){
       init();
     })
-
 
     var vehicles_run = function(){
         for (var i = 0; i < vehicles.length; i++) {
@@ -344,34 +363,6 @@
 
             }
         }
-
-        // var lastest_record = {
-        //     "id":1,
-        //     "gps_id":1,
-        //     "longitude":"121.438083000000",
-        //     "latitude":"31.347179000000",
-        //     "time":"2017-09-13 11:53:00"
-        // };
-        // var history_record = {
-        //     "gps_id":1,
-        //     "longitude":"121.438083000000",
-        //     "latitude":"31.347179000000",
-        //     "time":"2017-09-13 11:53:00"
-        // }
-        // $.post("/update_lastest_record",{"lastest_record":JSON.stringify(lastest_record)},function(data){
-        //     if (data.success) {
-        //         $.post("/save_history_record",{"history_record":JSON.stringify(history_record)},function(data){
-        //             if (data.success) {
-        //                 init();
-        //             }else {
-        //                 alert(data.message);
-        //             }
-        //         });
-        //     }else {
-        //         alert(data.message);
-        //     }
-        // });
-
     };
   </script>
 

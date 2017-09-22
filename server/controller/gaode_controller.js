@@ -204,6 +204,7 @@ exports.register = function(server, options, next){
                                         vehicle.speed = trace_map[vehicle.gps_id].speed;
                                         vehicle.direction = trace_map[vehicle.gps_id].direction;
                                         vehicle.distance = trace_map[vehicle.gps_id].distance;
+                                        
                                         vehicle.longitude = trace_map[vehicle.gps_id].longitude;
                                         vehicle.latitude = trace_map[vehicle.gps_id].latitude;
 									}
