@@ -111,14 +111,103 @@ var get_info = function(data,cb){
     var info= {
         "longitude":bj,
         "latitude":bw,
-		"direction":d,
-		"distance":l,
-		"speed":s,
+        "direction":d,
+        "distance":l,
+        "speed":s,
         "time":bt,
         "state":state
 	};
 
 	cb(info);
+};
+//简单算法
+var get_data = function(data,cb){
+  var pi = math.PI;
+  var r = 6371;
+  var aj = data.aj;
+	var aw = data.aw;
+	var bj = data.bj;
+	var bw = data.bw;
+	var at = data.at;
+	var bt = data.bt;
+	var ti = math.eval(bt+'-'+at);
+
+  if (ti==0) {
+      var info = {
+          "longitude":bj,
+          "latitude":bw,
+      "direction":0,
+      "distance":0,
+      "speed":0,
+          "time":bt,
+          "state":0
+    };
+
+      cb(info);
+      return;
+  }
+  //方向
+  var c1 = math.eval('cos((90-'+bw+') deg)');
+  var c2 = math.eval('cos((90-'+aw+') deg)');
+  var s1 = math.eval('sin((90-'+bw+') deg)');
+  var s2 = math.eval('sin((90-'+aw+') deg)');
+  var c3 = math.eval('cos(('+bj+'-'+aj+') deg)');
+
+  var cos_c = math.eval(c1*c2+s1*s2*c3);
+  var cc = math.eval(cos_c+'^2');
+  var cc = math.eval('1-'+cc);
+  var sc = math.sqrt(cc);
+
+  var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
+  var ss = math.eval(s1*s3/sc);
+
+  var hu = math.eval('asin('+ss+')');
+
+  var d = math.eval(hu/pi*180);
+
+  //距离，速度
+  aj = math.eval(aj*pi/180);
+  aw = math.eval(aw*pi/180);
+  bj = math.eval(bj*pi/180);
+  bw = math.eval(bw*pi/180);
+  var a = math.eval(aj+'-'+bj);
+  var b = math.eval(aw+'-'+bw);
+  a = math.eval(a/2);
+  a = math.eval('sin('+a+')');
+  a = math.eval(a*a);
+  b = math.eval(b/2);
+  b = math.eval('sin('+b+')');
+  b = math.eval(b*b);
+
+  d1 = math.eval('cos('+aw+')');
+  d2 = math.eval('cos('+bw+')');
+  a = math.eval(a*d1*d2);
+  b = math.eval(a+"+"+b);
+  b = math.sqrt(b);
+  b = math.eval('asin('+b+')');
+  b = math.eval(b*2);
+
+  l = math.eval(b*r);
+
+  var time = math.eval(ti/3600);
+  var s =  math.eval(l/time);
+  var state = 0;
+  if (l>0) {
+      state = 1;
+  }
+
+  var info= {
+      "longitude":data.bj,
+      "latitude":data.bw,
+      "direction":d,
+      "distance":l,
+      "speed":s,
+      "time":bt,
+      "state":state
+};
+
+cb(info);
+
 };
 //登入账号验证
 var do_login = function(data, cb){
@@ -204,7 +293,7 @@ exports.register = function(server, options, next){
                                         vehicle.speed = trace_map[vehicle.gps_id].speed;
                                         vehicle.direction = trace_map[vehicle.gps_id].direction;
                                         vehicle.distance = trace_map[vehicle.gps_id].distance;
-                                        
+
                                         vehicle.longitude = trace_map[vehicle.gps_id].longitude;
                                         vehicle.latitude = trace_map[vehicle.gps_id].latitude;
 									}
@@ -356,6 +445,51 @@ exports.register = function(server, options, next){
 
             }
         },
+        //计算简单
+        {
+            method: 'GET',
+            path: '/get_data',
+            handler: function(request, reply){
+              var data = {
+                "aj":121.627559110000,
+                "aw":31.274793940000,
+                "bj":121.628311130000,
+                "bw":31.274827810000,
+                "at":1506066703,
+                "bt":1506066728
+              }
+              get_data(data,function(data){
+                  data.gps_id = 12345678;
+                  if (!data.gps_id || !data.longitude || !data.latitude || !data.state || !data.time) {
+                      return reply({"success":false,"message":"trace params wrong","service_info":service_info});
+                  }
+                  server.plugins['models'].gps_vehicles_traces.search_trace_by_gps(data.gps_id,function(err,rows){
+                      if (!err) {
+                          if (rows.length ==0) {
+                              server.plugins['models'].gps_vehicles_traces.save_trace(data, function(err,result){
+                                  if (result.affectedRows>0) {
+                                      return reply({"success":true,"message":"add new trace","service_info":service_info});
+                                  }else {
+                                      return reply({"success":false,"message":result.mesmessage,"service_info":service_info});
+                                  }
+                              });
+                          }else {
+                              server.plugins['models'].gps_vehicles_traces.update_trace(data, function(err,result){
+                                  if (result.affectedRows>0) {
+                                      return reply({"success":true,"message":"update success ","service_info":service_info});
+                                  }else {
+                                      return reply({"success":false,"message":result.mesmessage,"service_info":service_info});
+                                  }
+                              });
+                          }
+                      }else {
+                          return reply({"success":false,"message":rows.mesmessage,"service_info":service_info});
+                      }
+                  });
+              });
+
+            }
+        },
 		//计算方向
         {
             method: 'GET',
@@ -440,7 +574,7 @@ exports.register = function(server, options, next){
     											   "at":rows[0].time,
     											   "bt":info.time
     										   }
-    										   get_info(data,function(data){
+    										   get_data(data,function(data){
                                                    data.gps_id = info.gps_id;
                                                    if (!data.gps_id || !data.longitude || !data.latitude || !data.state || !data.time) {
                                                        return reply({"success":false,"message":"trace params wrong","service_info":service_info});
