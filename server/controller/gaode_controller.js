@@ -146,12 +146,6 @@ var get_data = function(data,cb){
       cb(info);
       return;
   }
-
-  aj = math.eval(aj*pi/180);
-  aw = math.eval(aw*pi/180);
-  bj = math.eval(bj*pi/180);
-  bw = math.eval(bw*pi/180);
-
   //方向
   var c1 = math.eval('cos((90-'+bw+') deg)');
   var c2 = math.eval('cos((90-'+aw+') deg)');
@@ -163,15 +157,22 @@ var get_data = function(data,cb){
   var cc = math.eval(cos_c+'^2');
   var cc = math.eval('1-'+cc);
   var sc = math.sqrt(cc);
+  if (sc==0) {
+    var d = 0;
+  }else {
+    var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
+    var ss = math.eval(s1*s3/sc);
 
-  var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
-  var ss = math.eval(s1*s3/sc);
+    var hu = math.eval('asin('+ss+')');
 
-  var hu = math.eval('asin('+ss+')');
-
-  var d = math.eval(hu/pi*180);
+    var d = math.eval(hu/pi*180);
+  }
 
   //距离，速度
+  aj = math.eval(aj*pi/180);
+  aw = math.eval(aw*pi/180);
+  bj = math.eval(bj*pi/180);
+  bw = math.eval(bw*pi/180);
   var a = math.eval(aj+'-'+bj);
   var b = math.eval(aw+'-'+bw);
   a = math.eval(a/2);
@@ -513,22 +514,27 @@ exports.register = function(server, options, next){
 				var cc = math.eval(cos_c+'^2');
 				var cc = math.eval('1-'+cc);
 				var sc = math.sqrt(cc);
+        if (sc==0) {
+          var d = 0;
+          return reply({"success":true,"d":d});
+        }else {
+          var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
+  				var ss = math.eval(s1*s3/sc);
 
-				var s3 = math.eval('sin(('+bj+'-'+aj+') deg)');
-				var ss = math.eval(s1*s3/sc);
+  				var hu = math.eval('asin('+ss+')');
 
-				var hu = math.eval('asin('+ss+')');
+  				var pi = math.PI;
 
-				var pi = math.PI;
+  				var d = math.eval(hu/pi*180);
 
-				var d = math.eval(hu/pi*180);
-
-				var r = 6371;
-				var l =  math.eval(hu*r);
+  				var r = 6371;
+  				var l =  math.eval(hu*r);
 
 
 
-				return reply({"success":true,"d":d,"hu":hu,"l":l});
+  				return reply({"success":true,"d":d,"hu":hu,"l":l});
+        }
+
             }
         },
 		//接收GPS信息,新增历史记录，时时更新
