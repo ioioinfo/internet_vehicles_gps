@@ -146,6 +146,12 @@ var get_data = function(data,cb){
       cb(info);
       return;
   }
+
+  aj = math.eval(aj*pi/180);
+  aw = math.eval(aw*pi/180);
+  bj = math.eval(bj*pi/180);
+  bw = math.eval(bw*pi/180);
+
   //方向
   var c1 = math.eval('cos((90-'+bw+') deg)');
   var c2 = math.eval('cos((90-'+aw+') deg)');
@@ -166,10 +172,6 @@ var get_data = function(data,cb){
   var d = math.eval(hu/pi*180);
 
   //距离，速度
-  aj = math.eval(aj*pi/180);
-  aw = math.eval(aw*pi/180);
-  bj = math.eval(bj*pi/180);
-  bw = math.eval(bw*pi/180);
   var a = math.eval(aj+'-'+bj);
   var b = math.eval(aw+'-'+bw);
   a = math.eval(a/2);
@@ -451,12 +453,12 @@ exports.register = function(server, options, next){
             path: '/get_data',
             handler: function(request, reply){
               var data = {
-                "aj":121.627559110000,
-                "aw":31.274793940000,
-                "bj":121.628311130000,
-                "bw":31.274827810000,
-                "at":1506066703,
-                "bt":1506066728
+                "aj":121.627971130000,
+                "aw":31.274888850000,
+                "bj":121.627971090000,
+                "bw":31.274889030000,
+                "at":1507690362,
+                "bt":1507690363
               }
               get_data(data,function(data){
                   data.gps_id = 12345678;
@@ -495,10 +497,11 @@ exports.register = function(server, options, next){
             method: 'GET',
             path: '/get_direction',
             handler: function(request, reply){
-				var aj = 121.439943000000;
-				var aw = 31.343803000000;
-				var bj = 180.438083000000;
-				var bw = 180.347179000000;
+
+				var aj = 121.627971130000;
+				var aw = 31.274888850000;
+				var bj = 121.627971090000;
+				var bw = 31.274889030000;
 
 				var c1 = math.eval('cos((90-'+bw+') deg)');
 				var c2 = math.eval('cos((90-'+aw+') deg)');
